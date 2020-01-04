@@ -1,18 +1,18 @@
 package mbank.payload.request;
 
 import com.google.gson.annotations.SerializedName;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
 
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class LoginRequest {
 
     @SerializedName("UserName")
-    String userName;
+    private final String userName;
 
     @SerializedName("Password")
-    String password;
+    private final String password;
+
+    public LoginRequest(String userName, String password) {
+        this.userName = userName;
+        this.password = password;
+    }
 
 }

@@ -1,24 +1,42 @@
 package mbank.model;
 
 import com.google.gson.annotations.SerializedName;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
 
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CurrentAccount {
 
     @SerializedName("cProductName")
-    String accountName;
+    private final String accountName;
 
     @SerializedName("cAccountNumberForDisp")
-    String accountNumber;
+    private final String accountNumber;
 
     @SerializedName("mBalance")
-    double balance;
+    private final double balance;
 
     @SerializedName("cCurrency")
-    String currency;
+    private final String currency;
+
+    public CurrentAccount(String accountName, String accountNumber, double balance, String currency) {
+        this.accountName = accountName;
+        this.accountNumber = accountNumber;
+        this.balance = balance;
+        this.currency = currency;
+    }
+
+    public String getAccountName() {
+        return this.accountName;
+    }
+
+    public String getAccountNumber() {
+        return this.accountNumber;
+    }
+
+    public double getBalance() {
+        return this.balance;
+    }
+
+    public String getCurrency() {
+        return this.currency;
+    }
 
 }

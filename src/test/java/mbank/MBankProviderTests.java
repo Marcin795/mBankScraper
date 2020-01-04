@@ -1,6 +1,6 @@
 package mbank;
 
-import mbank.exceptions.InvalidCredentialsException;
+import mbank.exceptions.InvalidCredentials;
 import mbank.service.MBankProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -11,23 +11,26 @@ class MBankProviderTests {
     private static final String PASSWORD = "";
 
     @Test
-    void checkLoginCorrectCretentials() {
+    void checkLoginCorrectCredentials() {
         var mBankProvider = new MBankProvider();
-        assert mBankProvider.login(LOGIN, PASSWORD) != null;
+        try {
+            Assertions.assertNotNull(mBankProvider.logIn(LOGIN, PASSWORD));
+        } catch (InvalidCredentials e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     @Test
     void checkLoginInvalidCredentials() {
         var mBankProvider = new MBankProvider();
-        Assertions.assertThrows(InvalidCredentialsException.class, () -> mBankProvider.login("AdamMałysz", "JestemR4jdowcem"));
+        Assertions.assertThrows(InvalidCredentials.class, () -> mBankProvider.logIn("AdamMałysz", "JestemR4jdowcem"));
     }
 
     @Test
     void checkAccountData() {
         var mBankProvider = new MBankProvider();
-        var account = mBankProvider.login(LOGIN, PASSWORD);
-        assert account.getAccounts().getAccountTypesLists().getCurrentAccounts().size() > 0;
+        var account = mBankProvider.logIn(LOGIN, PASSWORD);
+        Assertions.assertNotEquals(0, account.getAccounts().getAccountTypesLists().getCurrentAccounts().size());
     }
-
 
 }

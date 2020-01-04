@@ -1,88 +1,86 @@
 package mbank.service;
 
-import com.google.gson.Gson;
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
-import mbank.exceptions.InvalidCredentialsException;
-import mbank.exceptions.LoginFailedException;
+import mbank.exceptions.InvalidCredentials;
+import mbank.exceptions.LoginFailed;
 import mbank.util.Http;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
+import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 
-import static mbank.util.MBankConstants.MBANK_BASE_URL;
-import static mbank.util.MBankConstants.TWO_FACTOR_REPEAT_LIMIT;
-
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MBankProvider {
 
-    MBankLoginRequests loginRequests;
-    MBankAccountDataRequests accountDataRequests;
+    private final MBankLoginRequests loginRequests;
+    private final MBankAccountDataRequests accountDataRequests;
 
     public MBankProvider() {
-        Gson gson = new Gson();
         CookieManager cookieManager = new CookieManager();
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         JavaNetCookieJar cookieJar = new JavaNetCookieJar(cookieManager);
         OkHttpClient client = new OkHttpClient().newBuilder().cookieJar(cookieJar).build();
         SessionParams sessionParams = new SessionParams();
-        Http http = new Http(client, gson, MBANK_BASE_URL);
+        Http http = new Http(client, "https://online.mbank.pl");
         loginRequests = new MBankLoginRequests(http, sessionParams);
         accountDataRequests = new MBankAccountDataRequests(http, sessionParams);
     }
 
-    public MBankAccount login(String username, String password) {
-        try {
-            initializeLogin(username, password);
-            awaitTwoFactorConfirmation();
-            if (finalizeLogin()) {
-                return new MBankAccount(accountDataRequests);
-            } else {
-                throw new LoginFailedException("Something went wrong");
-            }
-        } catch (IOException e) {
-            throw new LoginFailedException("Something went wrong");
-        }
+    public MBankAccount logIn(String username, String password) {
+        checkCredentials(username, password);
+        initializeLogin(username, password);
+        awaitTwoFactorConfirmation();
+        return finalizeLogin();
     }
 
-    private void initializeLogin(String username, String password) throws IOException {
-        var loginResponse = loginRequests.loginJson(username, password);
-        if(!loginResponse.getBody().isSuccessful()) {
-            throw new InvalidCredentialsException();
-        }
-        loginRequests.setupData();
-        loginRequests.scaAuthorizationData();
-        loginRequests.initPrepare();
+    private void checkCredentials(String username, String password) {
+        if(StringUtils.isBlank(username))
+            throw new InvalidCredentials("Username can't be blank");
+        if(StringUtils.isBlank(password))
+            throw new InvalidCredentials("Password can't be blank");
     }
 
-    private void awaitTwoFactorConfirmation() throws IOException {
+    private void initializeLogin(String username, String password) {
+        var loginResponse = loginRequests.getJsonLogin(username, password);
+        if(!loginResponse.getBody().isSuccessful())
+            throw new InvalidCredentials("Passed credentials are invalid.");
+        loginRequests.queryForSetupData();
+        loginRequests.queryForScaAuthorizationData();
+        loginRequests.queryForInitPrepare();
+    }
+
+    private void awaitTwoFactorConfirmation() {
         System.out.println("Waiting for 2fa confirmation...");
-        String status = loginRequests.status();
-        for(int i = 0; i < TWO_FACTOR_REPEAT_LIMIT && !status.matches("Authorized|Canceled"); i++, status = loginRequests.status()) {
+        String status = loginRequests.getStatus();
+        for(int i = 0; i < 60 && !status.matches("Authorized|Canceled"); i++, status = loginRequests.getStatus())
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new RuntimeException(e);
             }
-        }
-        if(status.equals("Authorized")) {
-            System.out.println("Login authorized.");
-            return;
-        }
-        if(status.equals("Canceled")) {
-            throw new LoginFailedException("2fa Cancelled");
-        }
-        throw new LoginFailedException("2fa Timeout");
+        verifyTwoFactorStatus(status);
     }
 
-    private boolean finalizeLogin() throws IOException {
+    private void verifyTwoFactorStatus(String status) {
+        switch(status) {
+            case "Authorized":
+                System.out.println("Login authorized.");
+                break;
+            case "Canceled":
+                throw new LoginFailed("2fa Cancelled");
+            default:
+                throw new LoginFailed("2fa Timeout");
+        }
+    }
+
+    private MBankAccount finalizeLogin() {
         loginRequests.execute();
         loginRequests.finalizeAuthorization();
-        return loginRequests.isLoggedIn();
+        if(loginRequests.isLoggedIn())
+            return new MBankAccount(accountDataRequests);
+        else
+            throw new LoginFailed("Something went wrong");
     }
 
 }

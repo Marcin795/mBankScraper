@@ -1,18 +1,19 @@
 package mbank.payload.response;
 
 import com.google.gson.annotations.SerializedName;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
 import mbank.model.AccountTypesLists;
 
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AccountsListResponse {
 
-    String name;
-
     @SerializedName("properties")
-    AccountTypesLists accountTypesLists;
+    private final AccountTypesLists accountTypesLists;
+
+    public AccountsListResponse(AccountTypesLists accountTypesLists) {
+        this.accountTypesLists = accountTypesLists;
+    }
+
+    public AccountTypesLists getAccountTypesLists() {
+        return this.accountTypesLists;
+    }
 
 }

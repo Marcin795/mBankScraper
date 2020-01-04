@@ -1,13 +1,11 @@
 package mbank.payload.request;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
-
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FinalizeAuthorizationRequest {
 
-    String scaAuthorizationId;
+    private final String scaAuthorizationId;
+
+    public FinalizeAuthorizationRequest(String scaAuthorizationId) {
+        this.scaAuthorizationId = scaAuthorizationId;
+    }
 
 }

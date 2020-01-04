@@ -1,15 +1,18 @@
 package mbank.payload.response;
 
 import com.google.gson.annotations.SerializedName;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
 
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ScaDataResponse {
 
     @SerializedName("ScaAuthorizationId")
-    String scaAuthorizationId;
+    private final String scaAuthorizationId;
+
+    public ScaDataResponse(String scaAuthorizationId) {
+        this.scaAuthorizationId = scaAuthorizationId;
+    }
+
+    public String getScaAuthorizationId() {
+        return this.scaAuthorizationId;
+    }
 
 }

@@ -1,14 +1,21 @@
 package mbank.payload.response;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
-
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class LoginResponse {
 
-    boolean successful;
-    String tabId;
+    private final boolean successful;
+    private final String tabId;
+
+    public LoginResponse(boolean successful, String tabId) {
+        this.successful = successful;
+        this.tabId = tabId;
+    }
+
+    public boolean isSuccessful() {
+        return this.successful;
+    }
+
+    public String getTabId() {
+        return this.tabId;
+    }
 
 }

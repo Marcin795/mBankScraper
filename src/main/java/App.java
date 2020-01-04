@@ -1,6 +1,5 @@
-import mbank.exceptions.BankAccountException;
-import mbank.exceptions.InvalidCredentialsException;
-import mbank.exceptions.LoginFailedException;
+import mbank.exceptions.InvalidCredentials;
+import mbank.exceptions.LoginFailed;
 import mbank.service.MBankAccount;
 import mbank.service.MBankProvider;
 
@@ -11,8 +10,7 @@ public class App {
         var mBankProvider = new MBankProvider();
 
         if (args.length != 2) {
-            System.out.println("Pass username and password as arguments: ");
-            System.out.println("mbankScraper username password");
+            System.out.println("Pass username and password as arguments");
             return;
         }
 
@@ -20,17 +18,13 @@ public class App {
         String password = args[1];
 
         try {
-            var account = mBankProvider.login(username, password);
+            var account = mBankProvider.logIn(username, password);
             printAccounts(account);
-        } catch (InvalidCredentialsException e) {
-            System.out.println("Passed credentials are invalid.");
-        } catch (LoginFailedException e) {
+        } catch (InvalidCredentials e) {
+            System.out.println(e.getMessage());
+        } catch (LoginFailed e) {
             System.out.println("Login failed: " + e.getMessage());
-        } catch (BankAccountException e) {
-            System.out.println("Bank account connection failed: ");
         }
-
-
     }
 
     private static void printAccounts(MBankAccount account) {
