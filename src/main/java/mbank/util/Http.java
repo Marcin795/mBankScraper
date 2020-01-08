@@ -72,7 +72,7 @@ public class Http {
             var response = client.newCall(request).execute();
             return responseClass == null ? getRequestWithoutBody(response) : getRequestWithBody(response, responseClass);
         } catch (IOException e) {
-            throw new CommunicationFailed();
+            throw new CommunicationFailed(e);
         }
     }
 
