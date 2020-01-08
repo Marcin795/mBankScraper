@@ -7,9 +7,6 @@ class SessionParams {
     private String scaAuthorizationId;
     private String tranId;
 
-    public SessionParams() {
-    }
-
     public String getXTabId() {
         return this.xTabId;
     }
