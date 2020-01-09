@@ -3,12 +3,10 @@ package mbank.service;
 import mbank.exceptions.InvalidCredentials;
 import mbank.exceptions.LoginFailed;
 import mbank.util.Http;
-import okhttp3.JavaNetCookieJar;
-import okhttp3.OkHttpClient;
-import org.apache.commons.lang3.StringUtils;
 
-import java.net.CookieManager;
-import java.net.CookiePolicy;
+import static java.lang.Thread.currentThread;
+import static java.lang.Thread.sleep;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class MBankProvider {
 
@@ -16,12 +14,8 @@ public class MBankProvider {
     private final MBankAccountDataRequests accountDataRequests;
 
     public MBankProvider() {
-        CookieManager cookieManager = new CookieManager();
-        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        JavaNetCookieJar cookieJar = new JavaNetCookieJar(cookieManager);
-        OkHttpClient client = new OkHttpClient().newBuilder().cookieJar(cookieJar).build();
         SessionParams sessionParams = new SessionParams();
-        Http http = new Http(client, "https://online.mbank.pl");
+        Http http = new Http();
         loginRequests = new MBankLoginRequests(http, sessionParams);
         accountDataRequests = new MBankAccountDataRequests(http, sessionParams);
     }
@@ -34,15 +28,15 @@ public class MBankProvider {
     }
 
     private void checkCredentials(String username, String password) {
-        if(StringUtils.isBlank(username))
+        if(isBlank(username))
             throw new InvalidCredentials("Username can't be blank");
-        if(StringUtils.isBlank(password))
+        if(isBlank(password))
             throw new InvalidCredentials("Password can't be blank");
     }
 
     private void initializeLogin(String username, String password) {
         var loginResponse = loginRequests.getJsonLogin(username, password);
-        if(!loginResponse.getBody().isSuccessful())
+        if(!loginResponse.body.successful)
             throw new InvalidCredentials("Passed credentials are invalid.");
         loginRequests.queryForSetupData();
         loginRequests.queryForScaAuthorizationData();
@@ -50,16 +44,20 @@ public class MBankProvider {
     }
 
     private void awaitTwoFactorConfirmation() {
-        System.out.println("Waiting for 2fa confirmation...");
+        System.out.println("Waiting for 2FA confirmation...");
         String status = loginRequests.getStatus();
-        for(int i = 0; i < 60 && !status.matches("Authorized|Canceled"); i++, status = loginRequests.getStatus())
+        for(int i = 0; i < 60 && !checkStatus(status); i++, status = loginRequests.getStatus())
             try {
-                Thread.sleep(1000);
+                sleep(1000);
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+                currentThread().interrupt();
                 throw new RuntimeException(e);
             }
         verifyTwoFactorStatus(status);
+    }
+
+    private boolean checkStatus(String status) {
+        return status.matches("Authorized|Canceled");
     }
 
     private void verifyTwoFactorStatus(String status) {
@@ -68,9 +66,9 @@ public class MBankProvider {
                 System.out.println("Login authorized.");
                 break;
             case "Canceled":
-                throw new LoginFailed("2fa Cancelled");
+                throw new LoginFailed("2FA Cancelled");
             default:
-                throw new LoginFailed("2fa Timeout");
+                throw new LoginFailed("2FA Timeout");
         }
     }
 

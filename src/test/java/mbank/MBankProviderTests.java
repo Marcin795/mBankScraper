@@ -5,6 +5,9 @@ import mbank.service.MBankProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 class MBankProviderTests {
 
     private static final String LOGIN = "";
@@ -23,14 +26,14 @@ class MBankProviderTests {
     @Test
     void checkLoginInvalidCredentials() {
         var mBankProvider = new MBankProvider();
-        Assertions.assertThrows(InvalidCredentials.class, () -> mBankProvider.logIn("AdamMałysz", "JestemR4jdowcem"));
+        assertThrows(InvalidCredentials.class, () -> mBankProvider.logIn("AdamMałysz", "JestemR4jdowcem"));
     }
 
     @Test
     void checkAccountData() {
         var mBankProvider = new MBankProvider();
         var account = mBankProvider.logIn(LOGIN, PASSWORD);
-        Assertions.assertNotEquals(0, account.getAccounts().getAccountTypesLists().getCurrentAccounts().size());
+        assertNotEquals(0, account.getAccounts().accountTypesLists.currentAccounts.size());
     }
 
 }

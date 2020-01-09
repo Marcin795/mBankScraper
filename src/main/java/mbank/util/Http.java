@@ -4,26 +4,29 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import mbank.exceptions.CommunicationFailed;
 import mbank.payload.response.Response;
-import okhttp3.Headers;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
+import okhttp3.*;
 
 import java.io.IOException;
+import java.net.CookieManager;
 import java.util.Objects;
+
+import static java.net.CookiePolicy.ACCEPT_ALL;
+import static okhttp3.MediaType.parse;
+import static okhttp3.RequestBody.create;
 
 
 public class Http {
 
+    public static final MediaType JSON = parse("application/json");
     private final OkHttpClient client;
-    private final String prefix;
-    private final Gson gson;
+    private final String ADDRESS_PREFIX = "https://online.mbank.pl";
+    private final Gson gson = new Gson();
 
-    public Http(OkHttpClient client, String prefix) {
-        this.client = client;
-        this.prefix = prefix;
-        this.gson = new Gson();
+    public Http() {
+        CookieManager cookieManager = new CookieManager();
+        cookieManager.setCookiePolicy(ACCEPT_ALL);
+        JavaNetCookieJar cookieJar = new JavaNetCookieJar(cookieManager);
+        client = new OkHttpClient().newBuilder().cookieJar(cookieJar).build();
     }
 
     public <T> Response<T> get(String path, Class<T> responseClass, Headers headers) {
@@ -36,7 +39,7 @@ public class Http {
     }
 
     public <T> Response<T> post(String path, Class<T> responseClass, Object requestObject, Headers headers) {
-        RequestBody requestBody = RequestBody.create(gson.toJson(requestObject), MediaType.parse("application/json"));
+        var requestBody = create(gson.toJson(requestObject), JSON);
         var request = prepare("POST", path, requestBody, headers);
         return send(request, responseClass);
     }
@@ -55,7 +58,7 @@ public class Http {
 
     private Request prepare(String method, String path, RequestBody requestBody, Headers headers) {
         var request = new Request.Builder()
-                .url(prefix + path)
+                .url(ADDRESS_PREFIX + path)
                 .method(method, requestBody)
                 .build();
         if(headers != null)
