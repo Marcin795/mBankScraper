@@ -17,7 +17,7 @@ import static okhttp3.RequestBody.create;
 
 public class Http {
 
-    public static final MediaType JSON = parse("application/json");
+    private static final MediaType JSON = parse("application/json");
     private final OkHttpClient client;
     private final String ADDRESS_PREFIX = "https://online.mbank.pl";
     private final Gson gson = new Gson();

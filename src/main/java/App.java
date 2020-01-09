@@ -1,10 +1,9 @@
 import mbank.exceptions.InvalidCredentials;
+import mbank.exceptions.InvalidInput;
 import mbank.exceptions.LoginFailed;
 import mbank.model.Credentials;
 import mbank.service.MBankAccount;
 import mbank.service.MBankProvider;
-
-import static java.lang.System.exit;
 
 public class App {
 
@@ -21,7 +20,7 @@ public class App {
     private static void checkArgs(String[] args) {
         if (args.length != 2) {
             System.out.println("Pass username and password as arguments");
-            exit(1);
+            throw new InvalidInput();
         }
     }
 

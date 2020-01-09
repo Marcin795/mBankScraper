@@ -6,11 +6,11 @@ import okhttp3.Headers;
 
 class MBankAccountDataRequests {
 
-    public static final String X_TAB_ID = "X-Tab-Id";
+    private static final String X_TAB_ID = "X-Tab-Id";
     private final Http http;
     private final SessionParams sessionParams;
 
-    public MBankAccountDataRequests(Http http, SessionParams sessionParams) {
+    MBankAccountDataRequests(Http http, SessionParams sessionParams) {
         this.http = http;
         this.sessionParams = sessionParams;
     }

@@ -36,11 +36,15 @@ public class MBankProvider {
 
     private void initializeLogin(String username, String password) {
         var loginResponse = loginRequests.getJsonLogin(username, password);
-        if(!loginResponse.body.successful)
-            throw new InvalidCredentials("Passed credentials are invalid.");
+        checkLoginSuccessful(loginResponse.body.successful);
         loginRequests.queryForSetupData();
         loginRequests.queryForScaAuthorizationData();
         loginRequests.queryForInitPrepare();
+    }
+
+    private void checkLoginSuccessful(boolean successful) {
+        if(!successful)
+            throw new InvalidCredentials("Passed credentials are invalid.");
     }
 
     private void awaitTwoFactorConfirmation() {
@@ -66,7 +70,7 @@ public class MBankProvider {
                 System.out.println("Login authorized.");
                 break;
             case "Canceled":
-                throw new LoginFailed("2FA Cancelled");
+                throw new LoginFailed("2FA Canceled");
             default:
                 throw new LoginFailed("2FA Timeout");
         }

@@ -12,12 +12,12 @@ import static java.time.LocalDateTime.now;
 
 class MBankLoginRequests {
 
-    public static final String X_REQUEST_VERIFICATION_TOKEN = "X-Request-Verification-Token";
-    public static final String X_TAB_ID = "X-Tab-Id";
+    private static final String X_REQUEST_VERIFICATION_TOKEN = "X-Request-Verification-Token";
+    private static final String X_TAB_ID = "X-Tab-Id";
     private final Http http;
     private final SessionParams sessionParams;
 
-    public MBankLoginRequests(Http http, SessionParams sessionParams) {
+    MBankLoginRequests(Http http, SessionParams sessionParams) {
         this.http = http;
         this.sessionParams = sessionParams;
     }
