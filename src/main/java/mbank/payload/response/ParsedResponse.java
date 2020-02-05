@@ -1,11 +1,11 @@
 package mbank.payload.response;
 
-public class Response<T> {
+public class ParsedResponse<T> {
 
     public final int status;
     public final T body;
 
-    public Response(int status, T body) {
+    public ParsedResponse(int status, T body) {
         this.status = status;
         this.body = body;
     }

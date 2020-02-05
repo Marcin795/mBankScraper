@@ -4,23 +4,23 @@ import mbank.exceptions.InvalidCredentials;
 import mbank.exceptions.LoginFailed;
 import mbank.util.Http;
 
-import static java.lang.Thread.currentThread;
-import static java.lang.Thread.sleep;
+import java.util.Set;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class MBankProvider {
+public class Provider {
 
-    private final MBankLoginRequests loginRequests;
-    private final MBankAccountDataRequests accountDataRequests;
+    private static final String CANCELED = "Canceled";
+    private static final String AUTHORIZED = "Authorized";
+    private final Requests requests;
 
-    public MBankProvider() {
+    public Provider() {
         SessionParams sessionParams = new SessionParams();
         Http http = new Http();
-        loginRequests = new MBankLoginRequests(http, sessionParams);
-        accountDataRequests = new MBankAccountDataRequests(http, sessionParams);
+        requests = new Requests(http, sessionParams);
     }
 
-    public MBankAccount logIn(String username, String password) {
+    public Account logIn(String username, String password) {
         checkCredentials(username, password);
         initializeLogin(username, password);
         awaitTwoFactorConfirmation();
@@ -35,11 +35,11 @@ public class MBankProvider {
     }
 
     private void initializeLogin(String username, String password) {
-        var loginResponse = loginRequests.getJsonLogin(username, password);
+        var loginResponse = requests.getJsonLogin(username, password);
         checkLoginSuccessful(loginResponse.body.successful);
-        loginRequests.queryForSetupData();
-        loginRequests.queryForScaAuthorizationData();
-        loginRequests.queryForInitPrepare();
+        requests.queryForSetupData();
+        requests.queryForScaAuthorizationData();
+        requests.queryForInitPrepare();
     }
 
     private void checkLoginSuccessful(boolean successful) {
@@ -49,40 +49,46 @@ public class MBankProvider {
 
     private void awaitTwoFactorConfirmation() {
         System.out.println("Waiting for 2FA confirmation...");
-        String status = loginRequests.getStatus();
-        for(int i = 0; i < 60 && !checkStatus(status); i++, status = loginRequests.getStatus())
-            try {
-                sleep(1000);
-            } catch (InterruptedException e) {
-                currentThread().interrupt();
-                throw new RuntimeException(e);
-            }
+        String status = requests.getStatus();
+        for(int tries = 0; tries++ < 60 && statusNotSet(status); status = requests.getStatus())
+            waitOneSecond();
         verifyTwoFactorStatus(status);
     }
 
-    private boolean checkStatus(String status) {
-        return status.matches("Authorized|Canceled");
+    private void waitOneSecond() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
+    }
+
+    private boolean statusNotSet(String status) {
+        return !Set.of(AUTHORIZED, CANCELED).contains(status);
     }
 
     private void verifyTwoFactorStatus(String status) {
         switch(status) {
-            case "Authorized":
+            case AUTHORIZED:
                 System.out.println("Login authorized.");
                 break;
-            case "Canceled":
+            case CANCELED:
                 throw new LoginFailed("2FA Canceled");
             default:
                 throw new LoginFailed("2FA Timeout");
         }
     }
 
-    private MBankAccount finalizeLogin() {
-        loginRequests.execute();
-        loginRequests.finalizeAuthorization();
-        if(loginRequests.isLoggedIn())
-            return new MBankAccount(accountDataRequests);
-        else
+    private Account finalizeLogin() {
+        requests.execute();
+        requests.finalizeAuthorization();
+        if(requests.isLoggedIn()) {
+            return new Account(requests);
+        }
+        else {
             throw new LoginFailed("Something went wrong");
+        }
     }
 
 }

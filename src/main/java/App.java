@@ -2,8 +2,8 @@ import mbank.exceptions.InvalidCredentials;
 import mbank.exceptions.InvalidInput;
 import mbank.exceptions.LoginFailed;
 import mbank.model.Credentials;
-import mbank.service.MBankAccount;
-import mbank.service.MBankProvider;
+import mbank.service.Account;
+import mbank.service.Provider;
 
 public class App {
 
@@ -26,15 +26,15 @@ public class App {
 
     private static void run(Credentials credentials) {
         try {
-            var mBankProvider = new MBankProvider();
-            var account = mBankProvider.logIn(credentials.username, credentials.password);
+            var provider = new Provider();
+            var account = provider.logIn(credentials.username, credentials.password);
             printAccounts(account);
         } catch (InvalidCredentials | LoginFailed e) {
             System.out.println(e.getMessage());
         }
     }
 
-    private static void printAccounts(MBankAccount account) {
+    private static void printAccounts(Account account) {
         var accountsList = account.getAccounts();
         accountsList.accountTypesLists.currentAccounts.forEach(accountData -> {
             System.out.println("Account name: " + accountData.accountName);
