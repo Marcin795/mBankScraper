@@ -6,8 +6,6 @@ import mbank.util.Http;
 
 import java.util.Set;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 public class Provider {
 
     private static final String CANCELED = "Canceled";
@@ -28,9 +26,9 @@ public class Provider {
     }
 
     private void checkCredentials(String username, String password) {
-        if(isBlank(username))
+        if(username.isBlank())
             throw new InvalidCredentials("Username can't be blank");
-        if(isBlank(password))
+        if(password.isBlank())
             throw new InvalidCredentials("Password can't be blank");
     }
 
@@ -83,12 +81,10 @@ public class Provider {
     private Account finalizeLogin() {
         requests.execute();
         requests.finalizeAuthorization();
-        if(requests.isLoggedIn()) {
+        if(requests.isLoggedIn())
             return new Account(requests);
-        }
-        else {
+        else
             throw new LoginFailed("Something went wrong");
-        }
     }
 
 }

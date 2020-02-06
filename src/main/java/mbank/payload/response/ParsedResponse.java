@@ -10,4 +10,11 @@ public class ParsedResponse<T> {
         this.body = body;
     }
 
+    public ParsedResponse(int status) {
+        this.status = status;
+        this.body = null;
+    }
+
+
+
 }

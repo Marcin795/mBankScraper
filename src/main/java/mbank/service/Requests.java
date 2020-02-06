@@ -55,8 +55,9 @@ class Requests {
     }
 
     void finalizeAuthorization() {
-        http.post("/pl/Sca/FinalizeAuthorization", new FinalizeAuthorizationRequest(sessionParams.scaAuthorizationId),
-                getXTabIdHeader());
+        var tabId = createSinleEntryHeaders(X_TAB_ID, sessionParams.xTabId);
+        var payload = new FinalizeAuthorizationRequest(sessionParams.scaAuthorizationId);
+        http.post("/pl/Sca/FinalizeAuthorization", payload, tabId);
     }
 
     boolean isLoggedIn() {
@@ -65,14 +66,10 @@ class Requests {
     }
 
     private Headers getXRequestVerificationTokenHeader() {
-        return header(X_REQUEST_VERIFICATION_TOKEN, sessionParams.xRequestVerificationToken);
+        return createSinleEntryHeaders(X_REQUEST_VERIFICATION_TOKEN, sessionParams.xRequestVerificationToken);
     }
 
-    private Headers getXTabIdHeader() {
-        return header(X_TAB_ID, sessionParams.xTabId);
-    }
-
-    private Headers header(String key, String value) {
+    private static Headers createSinleEntryHeaders(String key, String value) {
         return new Headers.Builder()
                 .add(key, value)
                 .build();
