@@ -6,6 +6,11 @@
     <groupId>hehe</groupId>
     <artifactId>mbank-scraper</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <login/>
+        <password/>
+    </properties>
     <build>
         <pluginManagement>
             <plugins>
@@ -26,7 +31,7 @@
                         <archive>
                             <manifest>
                                 <addClasspath>true</addClasspath>
-                                <mainClass>App</mainClass>
+                                <mainClass>app.App</mainClass>
                             </manifest>
                         </archive>
                     </configuration>
@@ -44,9 +49,10 @@
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>1.6.0</version>
                     <configuration>
-                        <mainClass>hehe.App</mainClass>
+                        <mainClass>app.App</mainClass>
                         <arguments>
-                            <argument>argument1</argument>
+                            <argument>${login}</argument>
+                            <argument>${password}</argument>
                         </arguments>
                     </configuration>
                 </plugin>
@@ -76,12 +82,12 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>4.2.0</version>
+            <version>4.3.1</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp-urlconnection</artifactId>
-            <version>4.2.0</version>
+            <version>4.3.1</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

@@ -7,6 +7,7 @@ import okhttp3.*;
 
 import java.io.IOException;
 import java.net.CookieManager;
+import java.util.Objects;
 
 import static java.net.CookiePolicy.ACCEPT_ALL;
 
@@ -86,11 +87,10 @@ public class Http {
 
     private <T> ParsedResponse<T> getRequestWithBody(Response response, Class<T> responseClass) {
         try {
-            var responseBody = gson.fromJson(response.body().string(), responseClass);
+            var responseBody = gson.fromJson(Objects.requireNonNull(response.body()).string(), responseClass);
             return new ParsedResponse<>(response.code(), responseBody);
         } catch (IOException e) {
             throw new CommunicationFailed("Expected response body");
         }
     }
-
 }
