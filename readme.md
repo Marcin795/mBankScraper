@@ -6,3 +6,5 @@ Run with
 ```
 mvn clean install exec:java -Dlogin=LOGIN -Dpassword=PASSWORD
 ```
+
+replace `LOGIN` and `PASSWORD` with working credentials.
