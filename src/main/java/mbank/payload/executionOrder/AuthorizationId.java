@@ -1,10 +1,10 @@
 package mbank.payload.executionOrder;
 
-public class StageFive {
+public class AuthorizationId {
 
     public final String scaAuthorizationId;
 
-    public StageFive(StageFour stageFour) {
+    public AuthorizationId(VerificationTokenAndAuthorizationTokenWithoutTranId stageFour) {
         scaAuthorizationId = stageFour.scaAuthorizationId;
     }
 }

@@ -1,11 +1,11 @@
 package mbank.payload.executionOrder;
 
-public class StageFour {
+public class VerificationTokenAndAuthorizationTokenWithoutTranId {
 
     public final String xRequestVerificationToken;
     public final String scaAuthorizationId;
 
-    public StageFour(Stage2fa stage2fa) {
+    public VerificationTokenAndAuthorizationTokenWithoutTranId(VerificationTokenAndAuthorizationTokenAndTranId stage2fa) {
         xRequestVerificationToken = stage2fa.xRequestVerificationToken;
         scaAuthorizationId = stage2fa.scaAuthorizationId;
     }

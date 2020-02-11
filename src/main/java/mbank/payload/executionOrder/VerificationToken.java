@@ -1,10 +1,10 @@
 package mbank.payload.executionOrder;
 
-public class StageOne {
+public class VerificationToken {
 
     public final String xRequestVerificationToken;
 
-    public StageOne(String xRequestVerificationToken) {
+    public VerificationToken(String xRequestVerificationToken) {
         this.xRequestVerificationToken = xRequestVerificationToken;
     }
 }

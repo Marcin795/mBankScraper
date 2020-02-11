@@ -3,9 +3,9 @@ package mbank.service;
 import mbank.exceptions.InvalidCredentials;
 import mbank.exceptions.LoginFailed;
 import mbank.model.Credentials;
-import mbank.payload.executionOrder.Stage2fa;
-import mbank.payload.executionOrder.StageFour;
-import mbank.payload.executionOrder.StageSix;
+import mbank.payload.executionOrder.VerificationTokenAndAuthorizationTokenAndTranId;
+import mbank.payload.executionOrder.VerificationTokenAndAuthorizationTokenWithoutTranId;
+import mbank.payload.executionOrder.JustEmptyClassToForceProperUsage;
 import mbank.util.Http;
 
 import java.util.Set;
@@ -22,17 +22,17 @@ public class ApiProvider {
     }
 
     public BankAccess logIn(Credentials credentials) {
-        var stage2fa = initializeLogin(credentials);
-        var stageFour = awaitTwoFactorConfirmation(stage2fa);
-        return finalizeLogin(stageFour);
+        var verificationTokenAndAuthorizationTokenAndTranId = initializeLogin(credentials);
+        var verificationTokenAndAuthorizationTokenWithoutTranId = awaitTwoFactorConfirmation(verificationTokenAndAuthorizationTokenAndTranId);
+        return finalizeLogin(verificationTokenAndAuthorizationTokenWithoutTranId);
     }
 
-    private Stage2fa initializeLogin(Credentials credentials) {
+    private VerificationTokenAndAuthorizationTokenAndTranId initializeLogin(Credentials credentials) {
         var loginResponse = requests.getJsonLogin(credentials);
         checkLoginSuccessful(loginResponse.body.successful);
-        var stageOne = requests.queryForSetupData(loginResponse.body);
-        var stageTwo = requests.queryForScaAuthorizationData(stageOne);
-        return requests.queryForInitPrepare(stageTwo);
+        var verificationToken = requests.queryForSetupData(loginResponse.body);
+        var verificationTokenAndAuthorizationId = requests.queryForScaAuthorizationData(verificationToken);
+        return requests.queryForInitPrepare(verificationTokenAndAuthorizationId);
     }
 
     private static void checkLoginSuccessful(boolean successful) {
@@ -40,13 +40,13 @@ public class ApiProvider {
             throw new InvalidCredentials("Passed credentials are invalid.");
     }
 
-    private StageFour awaitTwoFactorConfirmation(Stage2fa stage2fa) {
+    private VerificationTokenAndAuthorizationTokenWithoutTranId awaitTwoFactorConfirmation(VerificationTokenAndAuthorizationTokenAndTranId verificationTokenAndAuthorizationTokenAndTranId) {
         System.out.println("Waiting for 2FA confirmation...");
-        String status = requests.getStatus(stage2fa.tranId);
-        for(int tries = 0; tries++ < 60 && statusNotSet(status); status = requests.getStatus(stage2fa.tranId))
+        String status = requests.getStatus(verificationTokenAndAuthorizationTokenAndTranId.tranId);
+        for(int tries = 0; tries++ < 60 && statusNotSet(status); status = requests.getStatus(verificationTokenAndAuthorizationTokenAndTranId.tranId))
             waitOneSecond();
         verifyTwoFactorStatus(status);
-        return new StageFour(stage2fa);
+        return new VerificationTokenAndAuthorizationTokenWithoutTranId(verificationTokenAndAuthorizationTokenAndTranId);
     }
 
     private static boolean statusNotSet(String status) {
@@ -74,10 +74,10 @@ public class ApiProvider {
         }
     }
 
-    private BankAccess finalizeLogin(StageFour stageFour) {
-        var stageFive = requests.execute(stageFour);
-        StageSix stageSix = requests.finalizeAuthorization(stageFive);
-        if(requests.isLoggedIn(stageSix).loggedIn)
+    private BankAccess finalizeLogin(VerificationTokenAndAuthorizationTokenWithoutTranId verificationTokenAndAuthorizationTokenWithoutTranId) {
+        var authorizationId = requests.execute(verificationTokenAndAuthorizationTokenWithoutTranId);
+        JustEmptyClassToForceProperUsage justEmptyClassToForceProperUsage = requests.finalizeAuthorization(authorizationId);
+        if(requests.isLoggedIn(justEmptyClassToForceProperUsage).loggedIn)
             return new BankAccess(requests);
         else
             throw new LoginFailed("Something went wrong");

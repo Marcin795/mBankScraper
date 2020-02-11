@@ -26,21 +26,21 @@ class Requests {
         return http.post("/pl/LoginMain/Account/JsonLogin", LoginResponse.class, payload);
     }
 
-    StageOne queryForSetupData(LoginResponse loginResponse) {
+    VerificationToken queryForSetupData(LoginResponse loginResponse) {
         var response = http.get("/api/app/setup/data", SetupDataResponse.class);
-        return new StageOne(response.body.antiForgeryToken);
+        return new VerificationToken(response.body.antiForgeryToken);
     }
 
-    StageTwo queryForScaAuthorizationData(StageOne stageOne) {
+    VerificationTokenAndAuthorizationId queryForScaAuthorizationData(VerificationToken verificationToken) {
         var response = http.post("/pl/Sca/GetScaAuthorizationData", ScaDataResponse.class);
-        return new StageTwo(stageOne.xRequestVerificationToken, response.body.scaAuthorizationId);
+        return new VerificationTokenAndAuthorizationId(verificationToken.xRequestVerificationToken, response.body.scaAuthorizationId);
     }
 
-    Stage2fa queryForInitPrepare(StageTwo stageTwo) {
-        var payload = new InitPrepareRequest(stageTwo.scaAuthorizationId);
-        var headers = createSinleEntryHeaders(X_REQUEST_VERIFICATION_TOKEN, stageTwo.xRequestVerificationToken);
+    VerificationTokenAndAuthorizationTokenAndTranId queryForInitPrepare(VerificationTokenAndAuthorizationId verificationTokenAndAuthorizationId) {
+        var payload = new InitPrepareRequest(verificationTokenAndAuthorizationId.scaAuthorizationId);
+        var headers = createSinleEntryHeaders(X_REQUEST_VERIFICATION_TOKEN, verificationTokenAndAuthorizationId.xRequestVerificationToken);
         var response = http.post("/api/auth/initprepare", InitPrepareResponse.class, payload, headers);
-        return new Stage2fa(stageTwo, response.body.tranId);
+        return new VerificationTokenAndAuthorizationTokenAndTranId(verificationTokenAndAuthorizationId, response.body.tranId);
     }
 
     String getStatus(String tranId) {
@@ -48,19 +48,19 @@ class Requests {
         return response.body.status;
     }
 
-    StageFive execute(StageFour stageFour) {
-        var header = createSinleEntryHeaders(X_REQUEST_VERIFICATION_TOKEN, stageFour.xRequestVerificationToken);
+    AuthorizationId execute(VerificationTokenAndAuthorizationTokenWithoutTranId verificationTokenAndAuthorizationTokenWithoutTranId) {
+        var header = createSinleEntryHeaders(X_REQUEST_VERIFICATION_TOKEN, verificationTokenAndAuthorizationTokenWithoutTranId.xRequestVerificationToken);
         http.post("/api/auth/execute", header);
-        return new StageFive(stageFour);
+        return new AuthorizationId(verificationTokenAndAuthorizationTokenWithoutTranId);
     }
 
-    StageSix finalizeAuthorization(StageFive stageFive) {
-        var payload = new FinalizeAuthorizationRequest(stageFive.scaAuthorizationId);
+    JustEmptyClassToForceProperUsage finalizeAuthorization(AuthorizationId authorizationId) {
+        var payload = new FinalizeAuthorizationRequest(authorizationId.scaAuthorizationId);
         http.post("/pl/Sca/FinalizeAuthorization", payload);
-        return new StageSix();
+        return new JustEmptyClassToForceProperUsage();
     }
 
-    StageSeven isLoggedIn(StageSix stageSix) {
+    StageSeven isLoggedIn(JustEmptyClassToForceProperUsage stageSix) {
         var response = http.get("/api/chat/init?_=" + LocalDateTime.now());
         return new StageSeven(response.status == 200);
     }
