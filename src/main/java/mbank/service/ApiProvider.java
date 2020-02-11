@@ -6,26 +6,26 @@ import mbank.util.Http;
 
 import java.util.Set;
 
-public class Provider {
+public class ApiProvider {
 
     private static final String CANCELED = "Canceled";
     private static final String AUTHORIZED = "Authorized";
     private final Requests requests;
 
-    public Provider() {
+    public ApiProvider() {
         SessionParams sessionParams = new SessionParams();
         Http http = new Http();
         requests = new Requests(http, sessionParams);
     }
 
-    public Account logIn(String username, String password) {
+    public BankAccess logIn(String username, String password) {
         checkCredentials(username, password);
         initializeLogin(username, password);
         awaitTwoFactorConfirmation();
         return finalizeLogin();
     }
 
-    private void checkCredentials(String username, String password) {
+    private static void checkCredentials(String username, String password) {
         if(username.isBlank())
             throw new InvalidCredentials("Username can't be blank");
         if(password.isBlank())
@@ -40,7 +40,7 @@ public class Provider {
         requests.queryForInitPrepare();
     }
 
-    private void checkLoginSuccessful(boolean successful) {
+    private static void checkLoginSuccessful(boolean successful) {
         if(!successful)
             throw new InvalidCredentials("Passed credentials are invalid.");
     }
@@ -53,7 +53,11 @@ public class Provider {
         verifyTwoFactorStatus(status);
     }
 
-    private void waitOneSecond() {
+    private static boolean statusNotSet(String status) {
+        return !Set.of(AUTHORIZED, CANCELED).contains(status);
+    }
+
+    private static void waitOneSecond() {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -62,11 +66,7 @@ public class Provider {
         }
     }
 
-    private boolean statusNotSet(String status) {
-        return !Set.of(AUTHORIZED, CANCELED).contains(status);
-    }
-
-    private void verifyTwoFactorStatus(String status) {
+    private static void verifyTwoFactorStatus(String status) {
         switch(status) {
             case AUTHORIZED:
                 System.out.println("Login authorized.");
@@ -78,11 +78,11 @@ public class Provider {
         }
     }
 
-    private Account finalizeLogin() {
+    private BankAccess finalizeLogin() {
         requests.execute();
         requests.finalizeAuthorization();
         if(requests.isLoggedIn())
-            return new Account(requests);
+            return new BankAccess(requests);
         else
             throw new LoginFailed("Something went wrong");
     }

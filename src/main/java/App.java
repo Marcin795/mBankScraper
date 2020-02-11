@@ -1,16 +1,14 @@
-import mbank.exceptions.InvalidCredentials;
 import mbank.exceptions.InvalidInput;
-import mbank.exceptions.LoginFailed;
 import mbank.model.Credentials;
-import mbank.service.Account;
-import mbank.service.Provider;
+import mbank.service.ApiProvider;
+import mbank.service.BankAccess;
 
 public class App {
 
-    public static void main(String[] args) {
-        Credentials credentials = parseArgsToCredentials(args);
-        run(credentials);
-    }
+        public static void main(String[] args) {
+            Credentials credentials = parseArgsToCredentials(args);
+            run(credentials);
+        }
 
     private static Credentials parseArgsToCredentials(String[] args) {
         checkArgs(args);
@@ -25,18 +23,14 @@ public class App {
     }
 
     private static void run(Credentials credentials) {
-        try {
-            var provider = new Provider();
-            var account = provider.logIn(credentials.username, credentials.password);
-            printAccounts(account);
-        } catch (InvalidCredentials | LoginFailed e) {
-            System.out.println(e.getMessage());
-        }
+        var provider = new ApiProvider();
+        var account = provider.logIn(credentials.username, credentials.password);
+        printAccounts(account);
     }
 
-    private static void printAccounts(Account account) {
-        var accountsList = account.getAccounts();
-        accountsList.accountTypesLists.currentAccounts.forEach(accountData -> {
+    private static void printAccounts(BankAccess account) {
+        var accounts = account.getAccounts();
+        accounts.forEach(accountData -> {
             System.out.println("Account name: " + accountData.accountName);
             System.out.println("Account number: " + accountData.accountNumber);
             System.out.println("Account balance: " + accountData.balance + " " + accountData.currency);

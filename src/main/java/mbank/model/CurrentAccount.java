@@ -2,6 +2,8 @@ package mbank.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.math.BigDecimal;
+
 public class CurrentAccount {
 
     @SerializedName("cProductName")
@@ -11,7 +13,7 @@ public class CurrentAccount {
     public String accountNumber;
 
     @SerializedName("mBalance")
-    public double balance;
+    public BigDecimal balance;
 
     @SerializedName("cCurrency")
     public String currency;

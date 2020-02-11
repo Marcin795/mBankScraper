@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 class Requests {
 
     private static final String X_REQUEST_VERIFICATION_TOKEN = "X-Request-Verification-Token";
-    private static final String X_TAB_ID = "X-Tab-Id";
     private final Http http;
     private final SessionParams sessionParams;
 
@@ -25,7 +24,6 @@ class Requests {
     ParsedResponse<LoginResponse> getJsonLogin(String username, String password) {
         var response = http.post("/pl/LoginMain/Account/JsonLogin",
                 LoginResponse.class, new LoginRequest(username, password));
-        sessionParams.xTabId = response.body.tabId;
         return response;
     }
 
@@ -55,9 +53,8 @@ class Requests {
     }
 
     void finalizeAuthorization() {
-        var tabId = createSinleEntryHeaders(X_TAB_ID, sessionParams.xTabId);
         var payload = new FinalizeAuthorizationRequest(sessionParams.scaAuthorizationId);
-        http.post("/pl/Sca/FinalizeAuthorization", payload, tabId);
+        http.post("/pl/Sca/FinalizeAuthorization", payload);
     }
 
     boolean isLoggedIn() {

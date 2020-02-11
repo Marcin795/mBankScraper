@@ -26,17 +26,33 @@ public class Http {
                 .build();
     }
 
-    public <T> ParsedResponse<T> get(String path, Class<T> responseClass, Headers headers) {
-        var request = prepare(path, headers);
-        return send(request, responseClass);
+    public <T> ParsedResponse<T> get(String path) {
+        return get(path, null, EMPTY_HEADERS);
     }
 
     public <T> ParsedResponse<T> get(String path, Class<T> responseClass) {
         return get(path, responseClass, EMPTY_HEADERS);
     }
 
-    public <T> ParsedResponse<T> get(String path) {
-        return get(path, null, EMPTY_HEADERS);
+    public <T> ParsedResponse<T> get(String path, Class<T> responseClass, Headers headers) {
+        var request = prepare(path, headers);
+        return send(request, responseClass);
+    }
+
+    public <T> ParsedResponse<T> post(String path, Headers headers) {
+        return post(path, null, new Object(), headers);
+    }
+
+    public <T> ParsedResponse<T> post(String path, Class<T> responseClass) {
+        return post(path, responseClass, new Object(), EMPTY_HEADERS);
+    }
+
+    public <T> ParsedResponse<T> post(String path, Object requestObject) {
+        return post(path, null, requestObject);
+    }
+
+    public <T> ParsedResponse<T> post(String path, Class<T> responseClass, Object requestObject) {
+        return post(path, responseClass, requestObject, EMPTY_HEADERS);
     }
 
     public <T> ParsedResponse<T> post(String path, Class<T> responseClass, Object requestObject, Headers headers) {
@@ -45,32 +61,16 @@ public class Http {
         return send(request, responseClass);
     }
 
-    public <T> ParsedResponse<T> post(String path, Object requestObject, Headers headers) {
-        return post(path, null, requestObject, headers);
+    private static Request prepare(String path, Headers headers) {
+        return prepare("GET", path, null, headers);
     }
 
-    public <T> ParsedResponse<T> post(String path, Class<T> responseClass) {
-        return post(path, responseClass, new Object(), EMPTY_HEADERS);
-    }
-
-    public <T> ParsedResponse<T> post(String path, Headers headers) {
-        return post(path, null, new Object(), headers);
-    }
-
-    public <T> ParsedResponse<T> post(String path, Class<T> responseClass, Object requestObject) {
-        return post(path, responseClass, requestObject, EMPTY_HEADERS);
-    }
-
-    private Request prepare(String method, String path, RequestBody requestBody, Headers headers) {
+    private static Request prepare(String method, String path, RequestBody requestBody, Headers headers) {
         return new Request.Builder()
                 .url("https://online.mbank.pl" + path)
                 .method(method, requestBody)
                 .headers(headers)
                 .build();
-    }
-
-    private Request prepare(String path, Headers headers) {
-        return prepare("GET", path, null, headers);
     }
 
     private <T> ParsedResponse<T> send(Request request, Class<T> responseClass) {
