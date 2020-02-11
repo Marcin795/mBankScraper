@@ -1,6 +1,7 @@
 package mbank.payload.request;
 
 import com.google.gson.annotations.SerializedName;
+import mbank.model.Credentials;
 
 public class LoginRequest {
 
@@ -10,9 +11,9 @@ public class LoginRequest {
     @SerializedName("Password")
     private final String password;
 
-    public LoginRequest(String userName, String password) {
-        this.userName = userName;
-        this.password = password;
+    public LoginRequest(Credentials credentials) {
+        this.userName = credentials.username;
+        this.password = credentials.password;
     }
 
 }

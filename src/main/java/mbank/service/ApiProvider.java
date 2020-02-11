@@ -2,6 +2,10 @@ package mbank.service;
 
 import mbank.exceptions.InvalidCredentials;
 import mbank.exceptions.LoginFailed;
+import mbank.model.Credentials;
+import mbank.payload.executionOrder.Stage2fa;
+import mbank.payload.executionOrder.StageFour;
+import mbank.payload.executionOrder.StageSix;
 import mbank.util.Http;
 
 import java.util.Set;
@@ -13,31 +17,22 @@ public class ApiProvider {
     private final Requests requests;
 
     public ApiProvider() {
-        SessionParams sessionParams = new SessionParams();
         Http http = new Http();
-        requests = new Requests(http, sessionParams);
+        requests = new Requests(http);
     }
 
-    public BankAccess logIn(String username, String password) {
-        checkCredentials(username, password);
-        initializeLogin(username, password);
-        awaitTwoFactorConfirmation();
-        return finalizeLogin();
+    public BankAccess logIn(Credentials credentials) {
+        var stage2fa = initializeLogin(credentials);
+        var stageFour = awaitTwoFactorConfirmation(stage2fa);
+        return finalizeLogin(stageFour);
     }
 
-    private static void checkCredentials(String username, String password) {
-        if(username.isBlank())
-            throw new InvalidCredentials("Username can't be blank");
-        if(password.isBlank())
-            throw new InvalidCredentials("Password can't be blank");
-    }
-
-    private void initializeLogin(String username, String password) {
-        var loginResponse = requests.getJsonLogin(username, password);
+    private Stage2fa initializeLogin(Credentials credentials) {
+        var loginResponse = requests.getJsonLogin(credentials);
         checkLoginSuccessful(loginResponse.body.successful);
-        requests.queryForSetupData();
-        requests.queryForScaAuthorizationData();
-        requests.queryForInitPrepare();
+        var stageOne = requests.queryForSetupData(loginResponse.body);
+        var stageTwo = requests.queryForScaAuthorizationData(stageOne);
+        return requests.queryForInitPrepare(stageTwo);
     }
 
     private static void checkLoginSuccessful(boolean successful) {
@@ -45,12 +40,13 @@ public class ApiProvider {
             throw new InvalidCredentials("Passed credentials are invalid.");
     }
 
-    private void awaitTwoFactorConfirmation() {
+    private StageFour awaitTwoFactorConfirmation(Stage2fa stage2fa) {
         System.out.println("Waiting for 2FA confirmation...");
-        String status = requests.getStatus();
-        for(int tries = 0; tries++ < 60 && statusNotSet(status); status = requests.getStatus())
+        String status = requests.getStatus(stage2fa.tranId);
+        for(int tries = 0; tries++ < 60 && statusNotSet(status); status = requests.getStatus(stage2fa.tranId))
             waitOneSecond();
         verifyTwoFactorStatus(status);
+        return new StageFour(stage2fa);
     }
 
     private static boolean statusNotSet(String status) {
@@ -78,10 +74,10 @@ public class ApiProvider {
         }
     }
 
-    private BankAccess finalizeLogin() {
-        requests.execute();
-        requests.finalizeAuthorization();
-        if(requests.isLoggedIn())
+    private BankAccess finalizeLogin(StageFour stageFour) {
+        var stageFive = requests.execute(stageFour);
+        StageSix stageSix = requests.finalizeAuthorization(stageFive);
+        if(requests.isLoggedIn(stageSix).loggedIn)
             return new BankAccess(requests);
         else
             throw new LoginFailed("Something went wrong");

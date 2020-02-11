@@ -24,7 +24,7 @@ public class App {
 
     private static void run(Credentials credentials) {
         var provider = new ApiProvider();
-        var account = provider.logIn(credentials.username, credentials.password);
+        var account = provider.logIn(credentials);
         printAccounts(account);
     }
 
