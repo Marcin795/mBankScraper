@@ -60,9 +60,9 @@ class Requests {
         return new JustEmptyClassToForceProperUsage();
     }
 
-    StageSeven isLoggedIn(JustEmptyClassToForceProperUsage stageSix) {
+    LoginStatus isLoggedIn(JustEmptyClassToForceProperUsage justEmptyClassToForceProperUsage) {
         var response = http.get("/api/chat/init?_=" + LocalDateTime.now());
-        return new StageSeven(response.status == 200);
+        return new LoginStatus(response.status == 200);
     }
 
     private static Headers createSinleEntryHeaders(String key, String value) {

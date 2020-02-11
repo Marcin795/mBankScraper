@@ -6,6 +6,8 @@ import mbank.model.Credentials;
 import mbank.payload.executionOrder.VerificationTokenAndAuthorizationTokenAndTranId;
 import mbank.payload.executionOrder.VerificationTokenAndAuthorizationTokenWithoutTranId;
 import mbank.payload.executionOrder.JustEmptyClassToForceProperUsage;
+import mbank.payload.response.LoginResponse;
+import mbank.util.CommandLineInterface;
 import mbank.util.Http;
 
 import java.util.Set;
@@ -29,19 +31,19 @@ public class ApiProvider {
 
     private VerificationTokenAndAuthorizationTokenAndTranId initializeLogin(Credentials credentials) {
         var loginResponse = requests.getJsonLogin(credentials);
-        checkLoginSuccessful(loginResponse.body.successful);
+        checkLoginSuccessful(loginResponse.body);
         var verificationToken = requests.queryForSetupData(loginResponse.body);
         var verificationTokenAndAuthorizationId = requests.queryForScaAuthorizationData(verificationToken);
         return requests.queryForInitPrepare(verificationTokenAndAuthorizationId);
     }
 
-    private static void checkLoginSuccessful(boolean successful) {
-        if(!successful)
+    private static void checkLoginSuccessful(LoginResponse loginResponse) {
+        if(!loginResponse.successful && loginResponse.errorMessageTitle.equals("Nieprawidłowy identyfikator lub hasło."))
             throw new InvalidCredentials("Passed credentials are invalid.");
     }
 
     private VerificationTokenAndAuthorizationTokenWithoutTranId awaitTwoFactorConfirmation(VerificationTokenAndAuthorizationTokenAndTranId verificationTokenAndAuthorizationTokenAndTranId) {
-        System.out.println("Waiting for 2FA confirmation...");
+        CommandLineInterface.twoFactorPrompt();
         String status = requests.getStatus(verificationTokenAndAuthorizationTokenAndTranId.tranId);
         for(int tries = 0; tries++ < 60 && statusNotSet(status); status = requests.getStatus(verificationTokenAndAuthorizationTokenAndTranId.tranId))
             waitOneSecond();
@@ -65,7 +67,7 @@ public class ApiProvider {
     private static void verifyTwoFactorStatus(String status) {
         switch(status) {
             case AUTHORIZED:
-                System.out.println("Login authorized.");
+                CommandLineInterface.twoFactorConfirmation();
                 break;
             case CANCELED:
                 throw new LoginFailed("2FA Canceled");
