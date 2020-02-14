@@ -18,4 +18,10 @@ public class CurrentAccount {
     @SerializedName("cCurrency")
     public String currency;
 
+    public CurrentAccount(String accountName, String accountNumber, BigDecimal balance, String currency) {
+        this.accountName = accountName;
+        this.accountNumber = accountNumber;
+        this.balance = balance;
+        this.currency = currency;
+    }
 }

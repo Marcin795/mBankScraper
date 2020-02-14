@@ -1,7 +1,6 @@
 package mbank.service;
 
 import mbank.model.Credentials;
-import mbank.payload.executionOrder.*;
 import mbank.payload.request.FinalizeAuthorizationRequest;
 import mbank.payload.request.InitPrepareRequest;
 import mbank.payload.request.LoginRequest;
@@ -12,66 +11,64 @@ import okhttp3.Headers;
 
 import java.time.LocalDateTime;
 
-class Requests {
+public class Requests {
 
     private static final String X_REQUEST_VERIFICATION_TOKEN = "X-Request-Verification-Token";
     private final Http http;
 
-    Requests(Http http) {
+    public Requests(Http http) {
         this.http = http;
     }
 
-    ParsedResponse<LoginResponse> getJsonLogin(Credentials credentials) {
+    public LoginResponse getJsonLogin(Credentials credentials) {
         var payload = new LoginRequest(credentials);
-        return http.post("/pl/LoginMain/Account/JsonLogin", LoginResponse.class, payload);
+            return http.post("/pl/LoginMain/Account/JsonLogin", LoginResponse.class, payload).body;
     }
 
-    VerificationToken queryForSetupData(LoginResponse loginResponse) {
+    public String fetchVerificationToken() {
         var response = http.get("/api/app/setup/data", SetupDataResponse.class);
-        return new VerificationToken(response.body.antiForgeryToken);
+        return response.body.antiForgeryToken;
     }
 
-    VerificationTokenAndAuthorizationId queryForScaAuthorizationData(VerificationToken verificationToken) {
+    public String fetchAuthorizationId() {
         var response = http.post("/pl/Sca/GetScaAuthorizationData", ScaDataResponse.class);
-        return new VerificationTokenAndAuthorizationId(verificationToken.xRequestVerificationToken, response.body.scaAuthorizationId);
+        return response.body.scaAuthorizationId;
     }
 
-    VerificationTokenAndAuthorizationTokenAndTranId queryForInitPrepare(VerificationTokenAndAuthorizationId verificationTokenAndAuthorizationId) {
-        var payload = new InitPrepareRequest(verificationTokenAndAuthorizationId.scaAuthorizationId);
-        var headers = createSinleEntryHeaders(X_REQUEST_VERIFICATION_TOKEN, verificationTokenAndAuthorizationId.xRequestVerificationToken);
+    public String fetchTranId(String verificationToken, String authorizationId) {
+        var payload = new InitPrepareRequest(authorizationId);
+        var headers = createSinleEntryHeaders(X_REQUEST_VERIFICATION_TOKEN, verificationToken);
         var response = http.post("/api/auth/initprepare", InitPrepareResponse.class, payload, headers);
-        return new VerificationTokenAndAuthorizationTokenAndTranId(verificationTokenAndAuthorizationId, response.body.tranId);
+        return response.body.tranId;
     }
 
-    String getStatus(String tranId) {
+    public String getStatus(String tranId) {
         var response = http.post("/api/auth/status", StatusResponse.class, new StatusRequest(tranId));
         return response.body.status;
     }
 
-    AuthorizationId execute(VerificationTokenAndAuthorizationTokenWithoutTranId verificationTokenAndAuthorizationTokenWithoutTranId) {
-        var header = createSinleEntryHeaders(X_REQUEST_VERIFICATION_TOKEN, verificationTokenAndAuthorizationTokenWithoutTranId.xRequestVerificationToken);
+    public void execute(String verificationToken) {
+        var header = createSinleEntryHeaders(X_REQUEST_VERIFICATION_TOKEN, verificationToken);
         http.post("/api/auth/execute", header);
-        return new AuthorizationId(verificationTokenAndAuthorizationTokenWithoutTranId);
     }
 
-    JustEmptyClassToForceProperUsage finalizeAuthorization(AuthorizationId authorizationId) {
-        var payload = new FinalizeAuthorizationRequest(authorizationId.scaAuthorizationId);
-        http.post("/pl/Sca/FinalizeAuthorization", payload);
-        return new JustEmptyClassToForceProperUsage();
-    }
-
-    LoginStatus isLoggedIn(JustEmptyClassToForceProperUsage justEmptyClassToForceProperUsage) {
-        var response = http.get("/api/chat/init?_=" + LocalDateTime.now());
-        return new LoginStatus(response.status == 200);
-    }
-
-    private static Headers createSinleEntryHeaders(String key, String value) {
+    public static Headers createSinleEntryHeaders(String key, String value) {
         return new Headers.Builder()
                 .add(key, value)
                 .build();
     }
 
-    AccountsListResponse getAccountList() {
+    public void finalizeAuthorization(String authorizationId) {
+        var payload = new FinalizeAuthorizationRequest(authorizationId);
+        http.post("/pl/Sca/FinalizeAuthorization", payload);
+    }
+
+    public boolean isLoggedIn() {
+        var response = http.get("/api/chat/init?_=" + LocalDateTime.now());
+        return response.status == 200;
+    }
+
+    public AccountsListResponse getAccountList() {
         var response = http.post("/pl/Accounts/Accounts/List", AccountsListResponse.class);
         return response.body;
     }

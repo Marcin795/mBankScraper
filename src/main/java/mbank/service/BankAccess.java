@@ -17,4 +17,8 @@ public class BankAccess {
         return response.accountTypesLists.currentAccounts;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof BankAccess && ((BankAccess) obj).requests == this.requests;
+    }
 }

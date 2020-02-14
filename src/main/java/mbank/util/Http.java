@@ -2,7 +2,8 @@ package mbank.util;
 
 import com.google.gson.Gson;
 import mbank.exceptions.CommunicationFailed;
-import mbank.payload.response.ParsedResponse;
+import mbank.payload.response.Response;
+import mbank.payload.response.ResponseWithoutBody;
 import okhttp3.*;
 
 import java.io.IOException;
@@ -27,39 +28,49 @@ public class Http {
                 .build();
     }
 
-    public <T> ParsedResponse<T> get(String path) {
-        return get(path, null, EMPTY_HEADERS);
+    public ResponseWithoutBody get(String path) {
+        var request = prepare(path, EMPTY_HEADERS);
+        return new ResponseWithoutBody(send(request).code());
     }
 
-    public <T> ParsedResponse<T> get(String path, Class<T> responseClass) {
+    public void post(String path, Headers headers) {
+        post(path, new Object(), headers);
+    }
+
+    public void post(String path, Object requestObject) {
+        post(path, requestObject, EMPTY_HEADERS);
+    }
+
+    public void post(String path, Object requestObject, Headers headers) {
+        Request request = buildRequest(path, requestObject, headers);
+        send(request);
+    }
+
+    public <T> Response<T> get(String path, Class<T> responseClass) {
         return get(path, responseClass, EMPTY_HEADERS);
     }
 
-    public <T> ParsedResponse<T> get(String path, Class<T> responseClass, Headers headers) {
+    public <T> Response<T> get(String path, Class<T> responseClass, Headers headers) {
         var request = prepare(path, headers);
-        return send(request, responseClass);
+        return sendAndGetResponse(request, responseClass);
     }
 
-    public <T> ParsedResponse<T> post(String path, Headers headers) {
-        return post(path, null, new Object(), headers);
-    }
-
-    public <T> ParsedResponse<T> post(String path, Class<T> responseClass) {
+    public <T> Response<T> post(String path, Class<T> responseClass) {
         return post(path, responseClass, new Object(), EMPTY_HEADERS);
     }
 
-    public <T> ParsedResponse<T> post(String path, Object requestObject) {
-        return post(path, null, requestObject);
-    }
-
-    public <T> ParsedResponse<T> post(String path, Class<T> responseClass, Object requestObject) {
+    public <T> Response<T> post(String path, Class<T> responseClass, Object requestObject) {
         return post(path, responseClass, requestObject, EMPTY_HEADERS);
     }
 
-    public <T> ParsedResponse<T> post(String path, Class<T> responseClass, Object requestObject, Headers headers) {
+    public <T> Response<T> post(String path, Class<T> responseClass, Object requestObject, Headers headers) {
+        Request request = buildRequest(path, requestObject, headers);
+        return sendAndGetResponse(request, responseClass);
+    }
+
+    private Request buildRequest(String path, Object requestObject, Headers headers) {
         var requestBody = RequestBody.create(gson.toJson(requestObject), JSON_TYPE);
-        var request = prepare("POST", path, requestBody, headers);
-        return send(request, responseClass);
+        return prepare("POST", path, requestBody, headers);
     }
 
     private static Request prepare(String path, Headers headers) {
@@ -74,23 +85,27 @@ public class Http {
                 .build();
     }
 
-    private <T> ParsedResponse<T> send(Request request, Class<T> responseClass) {
+    private <T> Response<T> sendAndGetResponse(Request request, Class<T> responseClass) {
+        var response = send(request);
+        return getRequestWithBody(response, responseClass);
+    }
+
+    private okhttp3.Response send(Request request) {
         try {
-            var response = client.newCall(request).execute();
-            if (responseClass == null)
-                return new ParsedResponse<>(response.code());
-            return getRequestWithBody(response, responseClass);
+            return client.newCall(request).execute();
         } catch (IOException e) {
             throw new CommunicationFailed(e);
         }
     }
 
-    private <T> ParsedResponse<T> getRequestWithBody(Response response, Class<T> responseClass) {
+    private <T> Response<T> getRequestWithBody(okhttp3.Response response, Class<T> responseClass) {
         try {
-            var responseBody = gson.fromJson(Objects.requireNonNull(response.body()).string(), responseClass);
-            return new ParsedResponse<>(response.code(), responseBody);
+            ResponseBody body = response.body();
+            var responseBody = gson.fromJson(Objects.requireNonNull(body).string(), responseClass);
+            return new Response<>(responseBody);
         } catch (IOException e) {
             throw new CommunicationFailed("Expected response body");
         }
     }
+
 }
