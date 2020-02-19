@@ -1,13 +1,13 @@
-package mbank.payload.response;
+package mbank.model.payload.response;
 
 import com.google.gson.annotations.SerializedName;
 
-public class InitPrepareResponse {
+public class InitPrepareResponseBody {
 
     @SerializedName("TranId")
     public final String tranId;
 
-    public InitPrepareResponse(String tranId) {
+    public InitPrepareResponseBody(String tranId) {
         this.tranId = tranId;
     }
 

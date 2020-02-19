@@ -6,7 +6,7 @@ import java.util.List;
 
 public class BankAccess {
 
-    private final Requests requests;
+    public final Requests requests;
 
     public BankAccess(Requests requests) {
         this.requests = requests;
@@ -17,8 +17,4 @@ public class BankAccess {
         return response.accountTypesLists.currentAccounts;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof BankAccess && ((BankAccess) obj).requests == this.requests;
-    }
 }

@@ -1,11 +1,11 @@
-package mbank.payload.response;
+package mbank.model.payload.response;
 
-public class LoginResponse {
+public class LoginResponseBody {
 
     public final boolean successful;
     public final String errorMessageTitle;
 
-    public LoginResponse(boolean successful, String errorMessageTitle) {
+    public LoginResponseBody(boolean successful, String errorMessageTitle) {
         this.successful = successful;
         this.errorMessageTitle = errorMessageTitle;
     }

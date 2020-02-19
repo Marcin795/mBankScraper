@@ -1,4 +1,4 @@
-package mbank.model;
+package model;
 
 public class Credentials {
 

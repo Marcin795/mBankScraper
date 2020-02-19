@@ -1,13 +1,13 @@
-package mbank.payload.response;
+package mbank.model.payload.response;
 
 import com.google.gson.annotations.SerializedName;
 
-public class StatusResponse {
+public class StatusResponseBody {
 
     @SerializedName("Status")
     public final String status;
 
-    public StatusResponse(String status) {
+    public StatusResponseBody(String status) {
         this.status = status;
     }
 

@@ -7,16 +7,16 @@ import java.math.BigDecimal;
 public class CurrentAccount {
 
     @SerializedName("cProductName")
-    public String accountName;
+    public final String accountName;
 
     @SerializedName("cAccountNumberForDisp")
-    public String accountNumber;
+    public final String accountNumber;
 
     @SerializedName("mBalance")
-    public BigDecimal balance;
+    public final BigDecimal balance;
 
     @SerializedName("cCurrency")
-    public String currency;
+    public final String currency;
 
     public CurrentAccount(String accountName, String accountNumber, BigDecimal balance, String currency) {
         this.accountName = accountName;

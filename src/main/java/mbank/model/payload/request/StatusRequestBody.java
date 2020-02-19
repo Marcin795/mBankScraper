@@ -1,13 +1,13 @@
-package mbank.payload.request;
+package mbank.model.payload.request;
 
 import com.google.gson.annotations.SerializedName;
 
-public class StatusRequest {
+public class StatusRequestBody {
 
     @SerializedName("TranId")
     private final String tranId;
 
-    public StatusRequest(String tranId) {
+    public StatusRequestBody(String tranId) {
         this.tranId = tranId;
     }
 

@@ -1,9 +1,9 @@
-package mbank.util;
+package util;
 
 import com.google.gson.Gson;
-import mbank.exceptions.CommunicationFailed;
-import mbank.payload.response.Response;
-import mbank.payload.response.ResponseWithoutBody;
+import exceptions.CommunicationFailed;
+import model.Response;
+import model.ResponseWithoutBody;
 import okhttp3.*;
 
 import java.io.IOException;
@@ -15,11 +15,13 @@ import static java.net.CookiePolicy.ACCEPT_ALL;
 public class Http {
 
     private static final MediaType JSON_TYPE = MediaType.parse("application/json");
+    private final String BANK_ADDRESS;
     private final OkHttpClient client;
     private final Gson gson = new Gson();
     private static final Headers EMPTY_HEADERS = new Headers.Builder().build();
 
-    public Http() {
+    public Http(String bankAddress) {
+        BANK_ADDRESS = bankAddress;
         CookieManager cookieManager = new CookieManager();
         cookieManager.setCookiePolicy(ACCEPT_ALL);
         JavaNetCookieJar cookieJar = new JavaNetCookieJar(cookieManager);
@@ -73,13 +75,13 @@ public class Http {
         return prepare("POST", path, requestBody, headers);
     }
 
-    private static Request prepare(String path, Headers headers) {
+    private Request prepare(String path, Headers headers) {
         return prepare("GET", path, null, headers);
     }
 
-    private static Request prepare(String method, String path, RequestBody requestBody, Headers headers) {
+    private Request prepare(String method, String path, RequestBody requestBody, Headers headers) {
         return new Request.Builder()
-                .url("https://online.mbank.pl" + path)
+                .url(BANK_ADDRESS + path)
                 .method(method, requestBody)
                 .headers(headers)
                 .build();

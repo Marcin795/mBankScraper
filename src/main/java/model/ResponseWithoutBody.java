@@ -1,4 +1,4 @@
-package mbank.payload.response;
+package model;
 
 public class ResponseWithoutBody {
 

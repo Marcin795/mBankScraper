@@ -1,9 +1,9 @@
-package mbank.payload.request;
+package mbank.model.payload.request;
 
 import com.google.gson.annotations.SerializedName;
 import mbank.model.InitPrepareData;
 
-public class InitPrepareRequest {
+public class InitPrepareRequestBody {
 
     @SerializedName("Url")
     private final String url = "sca/authorization/disposable";
@@ -14,7 +14,7 @@ public class InitPrepareRequest {
     @SerializedName("Data")
     private final InitPrepareData data;
 
-    public InitPrepareRequest(String ScaAuthorizationId) {
+    public InitPrepareRequestBody(String ScaAuthorizationId) {
         data = new InitPrepareData(ScaAuthorizationId);
     }
 

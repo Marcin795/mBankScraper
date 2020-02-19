@@ -1,4 +1,4 @@
-package mbank.exceptions;
+package exceptions;
 
 public class InvalidInput extends RuntimeException {
 

@@ -1,13 +1,13 @@
-package mbank.payload.response;
+package mbank.model.payload.response;
 
 import com.google.gson.annotations.SerializedName;
 
-public class ScaDataResponse {
+public class ScaDataResponseBody {
 
     @SerializedName("ScaAuthorizationId")
     public final String scaAuthorizationId;
 
-    public ScaDataResponse(String scaAuthorizationId) {
+    public ScaDataResponseBody(String scaAuthorizationId) {
         this.scaAuthorizationId = scaAuthorizationId;
     }
 

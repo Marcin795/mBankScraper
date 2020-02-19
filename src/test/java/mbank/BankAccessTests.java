@@ -2,8 +2,10 @@ package mbank;
 
 import mbank.model.AccountTypesLists;
 import mbank.model.CurrentAccount;
-import mbank.payload.response.AccountsListResponse;
+import mbank.model.payload.response.AccountsListResponseBody;
+import mbank.service.BankAccess;
 import mbank.service.Requests;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -18,10 +20,11 @@ public class BankAccessTests {
     @Test
     void getAccountsTest() {
         var requests = mock(Requests.class);
+        var bankAccess = new BankAccess(requests);
         List<CurrentAccount> accounts = new ArrayList<>();
         accounts.add(new CurrentAccount("accountName", "accountNumber", BigDecimal.valueOf(1337), "EUD"));
-        when(requests.getAccountList()).thenReturn(new AccountsListResponse(new AccountTypesLists(accounts)));
-
+        when(requests.getAccountList()).thenReturn(new AccountsListResponseBody(new AccountTypesLists(accounts)));
+        Assertions.assertEquals(accounts, bankAccess.getAccounts());
     }
 
 }

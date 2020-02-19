@@ -1,12 +1,12 @@
 package mbank.service;
 
-import mbank.model.Credentials;
-import mbank.payload.request.FinalizeAuthorizationRequest;
-import mbank.payload.request.InitPrepareRequest;
-import mbank.payload.request.LoginRequest;
-import mbank.payload.request.StatusRequest;
-import mbank.payload.response.*;
-import mbank.util.Http;
+import model.Credentials;
+import mbank.model.payload.request.FinalizeAuthorizationRequestBody;
+import mbank.model.payload.request.InitPrepareRequestBody;
+import mbank.model.payload.request.LoginRequestBody;
+import mbank.model.payload.request.StatusRequestBody;
+import mbank.model.payload.response.*;
+import util.Http;
 import okhttp3.Headers;
 
 import java.time.LocalDateTime;
@@ -20,30 +20,30 @@ public class Requests {
         this.http = http;
     }
 
-    public LoginResponse getJsonLogin(Credentials credentials) {
-        var payload = new LoginRequest(credentials);
-            return http.post("/pl/LoginMain/Account/JsonLogin", LoginResponse.class, payload).body;
+    public LoginResponseBody getJsonLogin(Credentials credentials) {
+        var payload = new LoginRequestBody(credentials);
+            return http.post("/pl/LoginMain/Account/JsonLogin", LoginResponseBody.class, payload).body;
     }
 
     public String fetchVerificationToken() {
-        var response = http.get("/api/app/setup/data", SetupDataResponse.class);
+        var response = http.get("/api/app/setup/data", SetupDataResponseBody.class);
         return response.body.antiForgeryToken;
     }
 
     public String fetchAuthorizationId() {
-        var response = http.post("/pl/Sca/GetScaAuthorizationData", ScaDataResponse.class);
+        var response = http.post("/pl/Sca/GetScaAuthorizationData", ScaDataResponseBody.class);
         return response.body.scaAuthorizationId;
     }
 
     public String fetchTranId(String verificationToken, String authorizationId) {
-        var payload = new InitPrepareRequest(authorizationId);
+        var payload = new InitPrepareRequestBody(authorizationId);
         var headers = createSinleEntryHeaders(X_REQUEST_VERIFICATION_TOKEN, verificationToken);
-        var response = http.post("/api/auth/initprepare", InitPrepareResponse.class, payload, headers);
+        var response = http.post("/api/auth/initprepare", InitPrepareResponseBody.class, payload, headers);
         return response.body.tranId;
     }
 
     public String getStatus(String tranId) {
-        var response = http.post("/api/auth/status", StatusResponse.class, new StatusRequest(tranId));
+        var response = http.post("/api/auth/status", StatusResponseBody.class, new StatusRequestBody(tranId));
         return response.body.status;
     }
 
@@ -59,7 +59,7 @@ public class Requests {
     }
 
     public void finalizeAuthorization(String authorizationId) {
-        var payload = new FinalizeAuthorizationRequest(authorizationId);
+        var payload = new FinalizeAuthorizationRequestBody(authorizationId);
         http.post("/pl/Sca/FinalizeAuthorization", payload);
     }
 
@@ -68,8 +68,8 @@ public class Requests {
         return response.status == 200;
     }
 
-    public AccountsListResponse getAccountList() {
-        var response = http.post("/pl/Accounts/Accounts/List", AccountsListResponse.class);
+    public AccountsListResponseBody getAccountList() {
+        var response = http.post("/pl/Accounts/Accounts/List", AccountsListResponseBody.class);
         return response.body;
     }
 

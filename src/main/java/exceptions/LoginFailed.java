@@ -1,4 +1,4 @@
-package mbank.exceptions;
+package exceptions;
 
 public class LoginFailed extends RuntimeException {
 
