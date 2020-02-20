@@ -22,7 +22,7 @@ public class CommandLineInterfaceTests {
         var sout = System.out;
         System.setOut(new PrintStream(outputStream));
         var accounts = new ArrayList<CurrentAccount>();
-        accounts.add(new CurrentAccount("TheAccountName", "11 1234 1234 5678 9090", BigDecimal.valueOf(2137), "EU$"));
+        accounts.add(new CurrentAccount("TheAccountName", "11 1234 5678 9012 3456 7890 1234 5678", BigDecimal.valueOf(2137), "EU$"));
         printAccounts(accounts);
         String output = outputStream.toString();
         System.out.flush();
