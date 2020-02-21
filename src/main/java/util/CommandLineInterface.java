@@ -1,8 +1,6 @@
 package util;
 
-import exceptions.InvalidInput;
-import model.Credentials;
-import mbank.model.CurrentAccount;
+import unit.mbank.model.response.Account;
 
 import java.util.List;
 
@@ -16,7 +14,8 @@ public class CommandLineInterface {
         printLines("Waiting for 2FA confirmation...");
     }
 
-    public static void printAccounts(List<CurrentAccount> accounts) {
+    @SuppressWarnings("MethodMayBeStatic")
+    public void printAccounts(List<Account> accounts) {
         accounts.forEach(accountData -> printLines(
                     "Account name: " + accountData.accountName,
                     "Account number: " + accountData.accountNumber,
@@ -29,11 +28,4 @@ public class CommandLineInterface {
         }
     }
 
-    public static Credentials parseCredentials(String[] args) {
-        if (args.length != 2) {
-            argumentsPrompt();
-            throw new InvalidInput();
-        }
-        return new Credentials(args[0], args[1]);
-    }
 }

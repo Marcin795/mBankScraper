@@ -1,12 +1,10 @@
 package util;
 
 import com.google.gson.Gson;
-import exceptions.CommunicationFailed;
-import model.Response;
-import model.ResponseWithoutBody;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.CookieManager;
 import java.util.Objects;
 
@@ -15,13 +13,11 @@ import static java.net.CookiePolicy.ACCEPT_ALL;
 public class Http {
 
     private static final MediaType JSON_TYPE = MediaType.parse("application/json");
-    private final String BANK_ADDRESS;
     private final OkHttpClient client;
     private final Gson gson = new Gson();
     private static final Headers EMPTY_HEADERS = new Headers.Builder().build();
 
-    public Http(String bankAddress) {
-        BANK_ADDRESS = bankAddress;
+    public Http() {
         CookieManager cookieManager = new CookieManager();
         cookieManager.setCookiePolicy(ACCEPT_ALL);
         JavaNetCookieJar cookieJar = new JavaNetCookieJar(cookieManager);
@@ -30,9 +26,9 @@ public class Http {
                 .build();
     }
 
-    public ResponseWithoutBody get(String path) {
+    public int get(String path) {
         var request = prepare(path, EMPTY_HEADERS);
-        return new ResponseWithoutBody(send(request).code());
+        return send(request).code();
     }
 
     public void post(String path, Headers headers) {
@@ -48,24 +44,24 @@ public class Http {
         send(request);
     }
 
-    public <T> Response<T> get(String path, Class<T> responseClass) {
+    public <T> T get(String path, Class<T> responseClass) {
         return get(path, responseClass, EMPTY_HEADERS);
     }
 
-    public <T> Response<T> get(String path, Class<T> responseClass, Headers headers) {
+    public <T> T get(String path, Class<T> responseClass, Headers headers) {
         var request = prepare(path, headers);
         return sendAndGetResponse(request, responseClass);
     }
 
-    public <T> Response<T> post(String path, Class<T> responseClass) {
+    public <T> T post(String path, Class<T> responseClass) {
         return post(path, responseClass, new Object(), EMPTY_HEADERS);
     }
 
-    public <T> Response<T> post(String path, Class<T> responseClass, Object requestObject) {
+    public <T> T post(String path, Class<T> responseClass, Object requestObject) {
         return post(path, responseClass, requestObject, EMPTY_HEADERS);
     }
 
-    public <T> Response<T> post(String path, Class<T> responseClass, Object requestObject, Headers headers) {
+    public <T> T post(String path, Class<T> responseClass, Object requestObject, Headers headers) {
         Request request = buildRequest(path, requestObject, headers);
         return sendAndGetResponse(request, responseClass);
     }
@@ -75,19 +71,19 @@ public class Http {
         return prepare("POST", path, requestBody, headers);
     }
 
-    private Request prepare(String path, Headers headers) {
+    private static Request prepare(String path, Headers headers) {
         return prepare("GET", path, null, headers);
     }
 
-    private Request prepare(String method, String path, RequestBody requestBody, Headers headers) {
+    private static Request prepare(String method, String path, RequestBody requestBody, Headers headers) {
         return new Request.Builder()
-                .url(BANK_ADDRESS + path)
+                .url(path)
                 .method(method, requestBody)
                 .headers(headers)
                 .build();
     }
 
-    private <T> Response<T> sendAndGetResponse(Request request, Class<T> responseClass) {
+    private <T> T sendAndGetResponse(Request request, Class<T> responseClass) {
         var response = send(request);
         return getRequestWithBody(response, responseClass);
     }
@@ -96,17 +92,16 @@ public class Http {
         try {
             return client.newCall(request).execute();
         } catch (IOException e) {
-            throw new CommunicationFailed(e);
+            throw new UncheckedIOException("Communication failed", e);
         }
     }
 
-    private <T> Response<T> getRequestWithBody(okhttp3.Response response, Class<T> responseClass) {
+    private <T> T getRequestWithBody(okhttp3.Response response, Class<T> responseClass) {
         try {
             ResponseBody body = response.body();
-            var responseBody = gson.fromJson(Objects.requireNonNull(body).string(), responseClass);
-            return new Response<>(responseBody);
+            return gson.fromJson(Objects.requireNonNull(body).string(), responseClass);
         } catch (IOException e) {
-            throw new CommunicationFailed("Expected response body");
+            throw new UncheckedIOException("Body couldn't be read from okhttp3 response", e);
         }
     }
 
