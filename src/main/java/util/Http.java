@@ -26,58 +26,58 @@ public class Http {
                 .build();
     }
 
-    public int get(String path) {
-        var request = prepare(path, EMPTY_HEADERS);
+    public int get(String url) {
+        var request = prepare(url, EMPTY_HEADERS);
         return send(request).code();
     }
 
-    public void post(String path, Headers headers) {
-        post(path, new Object(), headers);
+    public void post(String url, Headers headers) {
+        post(url, new Object(), headers);
     }
 
-    public void post(String path, Object requestObject) {
-        post(path, requestObject, EMPTY_HEADERS);
+    public void post(String url, Object requestObject) {
+        post(url, requestObject, EMPTY_HEADERS);
     }
 
-    public void post(String path, Object requestObject, Headers headers) {
-        Request request = buildRequest(path, requestObject, headers);
+    public void post(String url, Object requestObject, Headers headers) {
+        Request request = buildRequest(url, requestObject, headers);
         send(request);
     }
 
-    public <T> T get(String path, Class<T> responseClass) {
-        return get(path, responseClass, EMPTY_HEADERS);
+    public <T> T get(String url, Class<T> responseClass) {
+        return get(url, responseClass, EMPTY_HEADERS);
     }
 
-    public <T> T get(String path, Class<T> responseClass, Headers headers) {
-        var request = prepare(path, headers);
+    public <T> T get(String url, Class<T> responseClass, Headers headers) {
+        var request = prepare(url, headers);
         return sendAndGetResponse(request, responseClass);
     }
 
-    public <T> T post(String path, Class<T> responseClass) {
-        return post(path, responseClass, new Object(), EMPTY_HEADERS);
+    public <T> T post(String url, Class<T> responseClass) {
+        return post(url, responseClass, new Object(), EMPTY_HEADERS);
     }
 
-    public <T> T post(String path, Class<T> responseClass, Object requestObject) {
-        return post(path, responseClass, requestObject, EMPTY_HEADERS);
+    public <T> T post(String url, Class<T> responseClass, Object requestObject) {
+        return post(url, responseClass, requestObject, EMPTY_HEADERS);
     }
 
-    public <T> T post(String path, Class<T> responseClass, Object requestObject, Headers headers) {
-        Request request = buildRequest(path, requestObject, headers);
+    public <T> T post(String url, Class<T> responseClass, Object requestObject, Headers headers) {
+        Request request = buildRequest(url, requestObject, headers);
         return sendAndGetResponse(request, responseClass);
     }
 
-    private Request buildRequest(String path, Object requestObject, Headers headers) {
+    private Request buildRequest(String url, Object requestObject, Headers headers) {
         var requestBody = RequestBody.create(gson.toJson(requestObject), JSON_TYPE);
-        return prepare("POST", path, requestBody, headers);
+        return prepare("POST", url, requestBody, headers);
     }
 
-    private static Request prepare(String path, Headers headers) {
-        return prepare("GET", path, null, headers);
+    private static Request prepare(String url, Headers headers) {
+        return prepare("GET", url, null, headers);
     }
 
-    private static Request prepare(String method, String path, RequestBody requestBody, Headers headers) {
+    private static Request prepare(String method, String url, RequestBody requestBody, Headers headers) {
         return new Request.Builder()
-                .url(path)
+                .url(url)
                 .method(method, requestBody)
                 .headers(headers)
                 .build();

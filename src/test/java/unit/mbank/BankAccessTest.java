@@ -31,7 +31,7 @@ class BankAccessTest {
     }
 
     @Test
-    void getAccountsRetrievesAccountsFromTheBankAndReturnsThem() {
+    void retrievesAndReturnsAccountsFromTheBank() {
         List<Account> expected = new ArrayList<>();
         when(requests.getAccountList()).thenReturn(new AccountsListResponseBody(new AccountTypesLists(expected)));
         var actual = bankAccess.getAccounts();

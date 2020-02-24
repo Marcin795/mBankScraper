@@ -3,18 +3,20 @@ package util;
 import unit.mbank.model.response.Account;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public class CommandLineInterface {
+public class CommandLine {
 
-    public static void argumentsPrompt() {
-        printLines("Pass username and password as arguments");
+    Consumer<String> printer;
+
+    public CommandLine(Consumer<String> printer) {
+        this.printer = printer;
     }
 
-    public static void twoFactorPrompt() {
+    public void twoFactorPrompt() {
         printLines("Waiting for 2FA confirmation...");
     }
 
-    @SuppressWarnings("MethodMayBeStatic")
     public void printAccounts(List<Account> accounts) {
         accounts.forEach(accountData -> printLines(
                     "Account name: " + accountData.accountName,
@@ -22,9 +24,9 @@ public class CommandLineInterface {
                     "Account balance: " + accountData.balance + " " + accountData.currency));
     }
 
-    private static void printLines(String... lines) {
+    private void printLines(String... lines) {
         for(var line : lines) {
-            System.out.println(line);
+            printer.accept(line);
         }
     }
 

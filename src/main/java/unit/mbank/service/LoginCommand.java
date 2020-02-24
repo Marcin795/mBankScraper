@@ -3,7 +3,7 @@ package unit.mbank.service;
 import exceptions.InvalidCredentials;
 import exceptions.LoginFailed;
 import unit.mbank.model.response.LoginResponseBody;
-import util.CommandLineInterface;
+import util.CommandLine;
 import util.Delays;
 import model.Credentials;
 
@@ -16,10 +16,12 @@ public class LoginCommand {
     private static final int MAX_RETRIES = 60;
     private final Requests requests;
     private final Delays delays;
+    private final CommandLine cli;
 
-    public LoginCommand(Requests requests, Delays delays) {
+    public LoginCommand(Requests requests, Delays delays, CommandLine cli) {
         this.requests = requests;
         this.delays = delays;
+        this.cli = cli;
     }
 
     public BankAccess logIn(Credentials credentials) {
@@ -38,7 +40,7 @@ public class LoginCommand {
     }
 
     private void awaitTwoFactorConfirmation(String tranId) {
-        CommandLineInterface.twoFactorPrompt();
+        cli.twoFactorPrompt();
         var status = checkStatus(tranId);
         verifyTwoFactorStatus(status);
     }

@@ -10,16 +10,17 @@ import unit.mbank.model.response.LoginResponseBody;
 import unit.mbank.service.BankAccess;
 import unit.mbank.service.LoginCommand;
 import unit.mbank.service.Requests;
+import util.CommandLine;
 import util.Delays;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 class LoginCommandTest {
 
-    private final Credentials credentials = new Credentials("user", "pass");
+    @Mock
+    private CommandLine cli;
 
     @Mock
     private Requests requests;
@@ -33,6 +34,7 @@ class LoginCommandTest {
     @InjectMocks
     private BankAccess expectedBankAccess;
 
+    private final Credentials credentials = new Credentials("user", "pass");
 
     @BeforeEach
     void init() {
@@ -50,11 +52,10 @@ class LoginCommandTest {
     }
 
     @Test
-    void requestsCallOrderMatchesWhatIsRequiredByBank() {
+    void requestsCallOrderMatchesRequiredByBank() {
         when(requests.isLoggedIn()).thenReturn(true);
         var actualBankAccess = loginCommand.logIn(credentials);
-        var condition = bankAccessEquals(expectedBankAccess, actualBankAccess);
-        assertTrue(condition);
+        assertBankAccessEquals(expectedBankAccess, actualBankAccess);
         var order = inOrder(requests);
         order.verify(requests).getJsonLogin(credentials);
         order.verify(requests).fetchVerificationToken();
@@ -65,35 +66,21 @@ class LoginCommandTest {
         order.verify(requests).finalizeAuthorization("authorizationId");
     }
 
-    private static boolean bankAccessEquals(BankAccess a, BankAccess b) {
-        return a.requests == b.requests;
+    private static void assertBankAccessEquals(BankAccess expected, BankAccess actual) {
+        assertEquals(expected.requests, actual.requests);
     }
 
     @Test
-    void logInFailedWithoutClearReasonThrowsLoginFailedException() {
+    void throwsLoginFailed() {
         when(requests.isLoggedIn()).thenReturn(false);
-        var loginInterface = loginCommand;
-        assertThrows(LoginFailed.class, () -> loginInterface.logIn(credentials));
-    }
-
-    @Test
-    void twoFactorCanceledThrowsLoginFailedException() {
-        when(requests.getStatus("tranId")).thenReturn("Canceled");
+        var loginCommand = this.loginCommand;
         assertThrows(LoginFailed.class, () -> loginCommand.logIn(credentials));
     }
 
     @Test
-    void twoFactorTimeoutThrowsLoginFailedException() {
+    void twoFactorTimeoutsAfter60SecondsAndThrowsLoginFailedException() {
         when(requests.getStatus("tranId")).thenReturn("Prepared");
         assertThrows(LoginFailed.class, () -> loginCommand.logIn(credentials));
-    }
-
-    @Test
-    void twoFactorWaits60SecondsForTimeout() {
-        when(requests.getStatus("tranId")).thenReturn("Prepared");
-        try {
-            loginCommand.logIn(credentials);
-        } catch (LoginFailed e) { /* ignored because it's not being tested here */ }
         verify(delays, times(60)).waitOneSecond();
     }
 

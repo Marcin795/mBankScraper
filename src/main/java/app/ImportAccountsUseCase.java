@@ -2,14 +2,14 @@ package app;
 
 import model.Credentials;
 import unit.mbank.service.LoginCommand;
-import util.CommandLineInterface;
+import util.CommandLine;
 
 public class ImportAccountsUseCase {
 
     private final LoginCommand loginCommand;
-    private final CommandLineInterface cli;
+    private final CommandLine cli;
 
-    public ImportAccountsUseCase(LoginCommand loginCommand, CommandLineInterface cli) {
+    public ImportAccountsUseCase(LoginCommand loginCommand, CommandLine cli) {
         this.loginCommand = loginCommand;
         this.cli = cli;
     }

@@ -9,25 +9,21 @@ import static org.junit.jupiter.api.Assertions.*;
 class CredentialsTest {
 
     @Test
-    void newCredentialsThrowsInvalidInputWithMoreOrLessParametersThanTwo() {
+    void throwsInvalidInputIfArgumentCountIsDifferentThanTwo() {
         assertThrows(InvalidInput.class, () -> new Credentials("user"));
         assertThrows(InvalidInput.class, () -> new Credentials("user", "pass", "someRandomArgument"));
     }
 
     @Test
-    void newCredentialsDoesntThrowInvalidInputWithExactlyTwoParameters() {
+    void doesntThrowInvalidInputWithExactlyTwoParameters() {
         assertDoesNotThrow(() -> new Credentials("user", "pass"));
     }
 
     @Test
     void newCredentialsMapsProperly() {
-        var expectedUsername = "user";
-        var expectedPassword = "pass";
-        var credentials = new Credentials(expectedUsername, expectedPassword);
-        var actualUsername = credentials.username;
-        var actualPassword = credentials.password;
-        assertEquals(actualUsername, actualUsername);
-        assertEquals(expectedPassword, actualPassword);
+        var actual = new Credentials("user", "pass");
+        assertEquals("user", actual.username);
+        assertEquals("pass", actual.password);
     }
 
 }

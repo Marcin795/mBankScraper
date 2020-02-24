@@ -5,8 +5,6 @@ import okhttp3.Headers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import unit.mbank.model.response.Account;
-import unit.mbank.model.response.AccountTypesLists;
 import unit.mbank.model.request.InitPrepareRequestBody;
 import unit.mbank.model.request.LoginRequestBody;
 import unit.mbank.model.request.StatusRequestBody;
@@ -24,8 +22,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 class RequestsTest {
 
-    private static final String BANK_ADDRESS = "https://online.mbank.pl";
-
     @Mock
     private Http http;
 
@@ -34,93 +30,97 @@ class RequestsTest {
     @BeforeEach
     void init() {
         initMocks(this);
-        requests = new Requests(http, BANK_ADDRESS);
+        requests = new Requests(http);
     }
 
     @Test
-    void getJsonLoginReturnsLoginResponseBody() {
+    void returnsLoginResponse() {
         var credentials = new Credentials("correctUsername", "correctPassword");
         var expected = new LoginResponseBody(true, "");
-        when(http.post(eq(BANK_ADDRESS + "/pl/LoginMain/Account/JsonLogin"), eq(LoginResponseBody.class), isA(LoginRequestBody.class)))
-                .thenReturn(expected);
+        when(http.post(
+                endsWith("/pl/LoginMain/Account/JsonLogin"),
+                eq(LoginResponseBody.class),
+                isA(LoginRequestBody.class)
+        )).thenReturn(expected);
         var actual = requests.getJsonLogin(credentials);
         assertEquals(expected, actual);
     }
 
     @Test
-    void fetchVerificationTokenReturnsVerificationTokenFromResponseBody() {
+    void returnsVerificationToken() {
         var expected = "verificationToken";
-        when(http.get(BANK_ADDRESS + "/api/app/setup/data", SetupDataResponseBody.class))
-                .thenReturn(new SetupDataResponseBody(expected));
+        when(http.get(
+                endsWith("/api/app/setup/data"),
+                eq(SetupDataResponseBody.class)
+        )).thenReturn(new SetupDataResponseBody(expected));
         var actual = requests.fetchVerificationToken();
         assertEquals(expected, actual);
     }
 
     @Test
-    void fetchAuthorizationIdReturnsIdFromResponseBody() {
+    void returnsAuthorizationId() {
         var expected = "authorizationId";
-        when(http.post(BANK_ADDRESS + "/pl/Sca/GetScaAuthorizationData", ScaDataResponseBody.class))
-                .thenReturn(new ScaDataResponseBody(expected));
+        when(http.post(
+                endsWith("/pl/Sca/GetScaAuthorizationData"),
+                eq(ScaDataResponseBody.class))
+        ).thenReturn(new ScaDataResponseBody(expected));
         var actual = requests.fetchAuthorizationId();
         assertEquals(expected, actual);
     }
 
     @Test
-    void fetchTranIdReturnsTranIdFromResponseBody() {
+    void returnsTranId() {
         var expected = "tranId";
-        when(
-                http.post(eq(BANK_ADDRESS + "/api/auth/initprepare"),
-                        eq(InitPrepareResponseBody.class),
-                        isA(InitPrepareRequestBody.class),
-                        isA(Headers.class))
-        ).thenReturn(new InitPrepareResponseBody(expected));
+        when(http.post(
+                endsWith("/api/auth/initprepare"),
+                eq(InitPrepareResponseBody.class),
+                isA(InitPrepareRequestBody.class),
+                isA(Headers.class)
+        )).thenReturn(new InitPrepareResponseBody(expected));
         var actual = requests.fetchTranId("verificationToken", "authorizationId");
         assertEquals(expected, actual);
     }
 
     @Test
-    void getStatusReturnsStatusFromResponseBody() {
+    void returnsStatus() {
         var expected = "Authorized";
-        when(http.post(eq(BANK_ADDRESS + "/api/auth/status"),
+        when(http.post(
+                endsWith("/api/auth/status"),
                 eq(StatusResponseBody.class),
-                isA(StatusRequestBody.class))
-        ).thenReturn(new StatusResponseBody(expected));
+                isA(StatusRequestBody.class)
+        )).thenReturn(new StatusResponseBody(expected));
         var actual = requests.getStatus("tranId");
         assertEquals(expected, actual);
     }
 
     @Test
-    void createSingleEntryHeadersReturnsCorrectHeader() {
-        var expected = "value";
-        var headers = Requests.createSinleEntryHeaders("key", expected);
-        var actual = headers.get("key");
-        assertEquals(expected, actual);
+    void returnsTrueIfLoggedInSuccessfully() {
+        when(http.get(
+                contains("/api/chat/init?_=")
+        )).thenReturn(200);
+        assertTrue(requests.isLoggedIn());
     }
 
     @Test
-    void isLoggedInReturnsTrueIfChatReturns200() {
-        when(http.get(startsWith(BANK_ADDRESS + "/api/chat/init?_="))).thenReturn(200);
-        var condition = requests.isLoggedIn();
-        assertTrue(condition);
+    void returnsFalseIfLogInFailed() {
+        when(http.get(
+                contains("/api/chat/init?_=")
+        )).thenReturn(401);
+        assertFalse(requests.isLoggedIn());
     }
 
     @Test
-    void isLoggedInReturnsFalseIfChatReturns401() {
-        when(http.get(startsWith(BANK_ADDRESS + "/api/chat/init?_="))).thenReturn(401);
-        var condition = requests.isLoggedIn();
-        assertFalse(condition);
-    }
-
-    @Test
-    void getAccountListReturnsAccountListFromResponseBody() {
+    void returnsAccountList() {
         var account = new Account("TheAccountName",
                 "11 1234 5678 9012 3456 7890 1234 5678",
                 BigDecimal.valueOf(2137),
                 "EU$");
         var accounts = Collections.singletonList(account);
         var expected = new AccountsListResponseBody(new AccountTypesLists(accounts));
-        when(http.post(BANK_ADDRESS + "/pl/Accounts/Accounts/List", AccountsListResponseBody.class))
-                .thenReturn(expected);
+        when(http.post(
+                endsWith("/pl/Accounts/Accounts/List"),
+                eq(AccountsListResponseBody.class)
+        )).thenReturn(expected);
         var actual = requests.getAccountList();
         assertEquals(expected, actual);
     }

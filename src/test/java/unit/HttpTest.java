@@ -15,7 +15,8 @@ import util.Http;
 import java.io.UncheckedIOException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 class HttpTest {
@@ -43,7 +44,7 @@ class HttpTest {
     }
 
     @Test
-    void getRequestsSendsProperlyAndReturnStatus() {
+    void sendsProperlyAndReturnStatus() {
         var expected = 200;
         wireMockServer.stubFor(get(urlEqualTo("/responseWithoutBody"))
                 .willReturn(aResponse().withHeader("Content-Type", "text/plain")
@@ -55,7 +56,7 @@ class HttpTest {
     }
 
     @Test
-    void voidPostRequestSendsHeadersAndBody() {
+    void requestSendsHeadersAndBody() {
         wireMockServer.stubFor(post(urlEqualTo("/void/post"))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "text/plain")
@@ -67,7 +68,7 @@ class HttpTest {
     }
 
     @Test
-    void getSendsProperHeadersAndReturnsResponseBody() {
+    void sendsProperHeadersAndReturnsResponse() {
         wireMockServer.stubFor(get(urlEqualTo("/response/with/body"))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "text/json")
@@ -75,11 +76,11 @@ class HttpTest {
         var actual = http.get(TEST_ADDRESS + "/response/with/body", LoginResponseBody.class, TEST_HEADERS);
         verify(getRequestedFor(urlEqualTo("/response/with/body"))
                 .withHeader("testKey", equalTo("testValue")));
-        assertTrue(responseEqualsExpected(actual));
+        assertResponseEquals(EXPECTED_RESPONSE_BODY, actual);
     }
 
     @Test
-    void postSendsProperHeadersAndBodyAndReturnsResponseBody() {
+    void sendsProperHeadersAndBodyAndReturnsResponse() {
         wireMockServer.stubFor(post(urlEqualTo("/response/with/body"))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "text/json")
@@ -88,16 +89,16 @@ class HttpTest {
         verify(postRequestedFor(urlEqualTo("/response/with/body"))
                 .withHeader("testKey", equalTo("testValue"))
                 .withRequestBody(equalToJson(EXPECTED_REQUEST_BODY_JSON)));
-        assertTrue(responseEqualsExpected(actual));
+        assertResponseEquals(actual, EXPECTED_RESPONSE_BODY);
     }
 
-    static boolean responseEqualsExpected(LoginResponseBody actualResponse) {
-        return actualResponse.successful == EXPECTED_RESPONSE_BODY.successful
-                && actualResponse.errorMessageTitle.equals(EXPECTED_RESPONSE_BODY.errorMessageTitle);
+    static void assertResponseEquals(LoginResponseBody expected, LoginResponseBody actual) {
+        assertEquals(expected.successful, actual.successful);
+        assertEquals(expected.errorMessageTitle, actual.errorMessageTitle);
     }
 
     @Test
-    void faultyResponseThrowsUncheckedUIException() {
+    void faultyResponseThrowsUncheckedIOException() {
         wireMockServer.stubFor(get(urlEqualTo("/fault"))
                 .willReturn(aResponse().withFault(Fault.MALFORMED_RESPONSE_CHUNK)));
         assertThrows(UncheckedIOException.class, () -> http.get(TEST_ADDRESS + "/fault"));
