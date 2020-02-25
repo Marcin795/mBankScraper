@@ -6,10 +6,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import unit.mbank.model.response.LoginResponseBody;
-import unit.mbank.service.BankAccess;
-import unit.mbank.service.LoginCommand;
-import unit.mbank.service.Requests;
+import mbank.model.response.LoginResponseBody;
+import mbank.service.BankAccess;
+import mbank.service.LoginCommand;
+import mbank.service.Requests;
 import util.CommandLine;
 import util.Delays;
 

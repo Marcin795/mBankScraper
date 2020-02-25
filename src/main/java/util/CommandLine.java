@@ -1,6 +1,6 @@
 package util;
 
-import unit.mbank.model.response.Account;
+import mbank.model.response.Account;
 
 import java.util.List;
 import java.util.function.Consumer;

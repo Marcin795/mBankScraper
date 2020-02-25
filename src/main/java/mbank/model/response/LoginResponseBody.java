@@ -1,4 +1,4 @@
-package unit.mbank.model.response;
+package mbank.model.response;
 
 public class LoginResponseBody {
 

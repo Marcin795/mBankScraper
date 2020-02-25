@@ -1,7 +1,7 @@
 package unit.mbank;
 
 import org.junit.jupiter.api.Test;
-import unit.mbank.model.response.Account;
+import mbank.model.response.Account;
 import util.CommandLine;
 
 import java.math.BigDecimal;

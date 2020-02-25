@@ -5,11 +5,11 @@ import okhttp3.Headers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import unit.mbank.model.request.InitPrepareRequestBody;
-import unit.mbank.model.request.LoginRequestBody;
-import unit.mbank.model.request.StatusRequestBody;
-import unit.mbank.model.response.*;
-import unit.mbank.service.Requests;
+import mbank.model.request.InitPrepareRequestBody;
+import mbank.model.request.LoginRequestBody;
+import mbank.model.request.StatusRequestBody;
+import mbank.model.response.*;
+import mbank.service.Requests;
 import util.Http;
 
 import java.math.BigDecimal;

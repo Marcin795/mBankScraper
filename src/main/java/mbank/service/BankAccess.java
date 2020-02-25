@@ -1,6 +1,6 @@
-package unit.mbank.service;
+package mbank.service;
 
-import unit.mbank.model.response.Account;
+import mbank.model.response.Account;
 
 import java.util.List;
 

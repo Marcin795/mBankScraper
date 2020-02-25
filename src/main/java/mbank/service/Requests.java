@@ -1,11 +1,11 @@
-package unit.mbank.service;
+package mbank.service;
 
 import model.Credentials;
-import unit.mbank.model.request.FinalizeAuthorizationRequestBody;
-import unit.mbank.model.request.InitPrepareRequestBody;
-import unit.mbank.model.request.LoginRequestBody;
-import unit.mbank.model.request.StatusRequestBody;
-import unit.mbank.model.response.*;
+import mbank.model.request.FinalizeAuthorizationRequestBody;
+import mbank.model.request.InitPrepareRequestBody;
+import mbank.model.request.LoginRequestBody;
+import mbank.model.request.StatusRequestBody;
+import mbank.model.response.*;
 import util.Http;
 import okhttp3.Headers;
 

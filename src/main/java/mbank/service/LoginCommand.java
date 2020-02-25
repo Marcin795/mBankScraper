@@ -1,8 +1,8 @@
-package unit.mbank.service;
+package mbank.service;
 
 import exceptions.InvalidCredentials;
 import exceptions.LoginFailed;
-import unit.mbank.model.response.LoginResponseBody;
+import mbank.model.response.LoginResponseBody;
 import util.CommandLine;
 import util.Delays;
 import model.Credentials;

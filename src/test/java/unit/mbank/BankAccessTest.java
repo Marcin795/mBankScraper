@@ -4,11 +4,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import unit.mbank.model.response.Account;
-import unit.mbank.model.response.AccountTypesLists;
-import unit.mbank.model.response.AccountsListResponseBody;
-import unit.mbank.service.BankAccess;
-import unit.mbank.service.Requests;
+import mbank.model.response.Account;
+import mbank.model.response.AccountTypesLists;
+import mbank.model.response.AccountsListResponseBody;
+import mbank.service.BankAccess;
+import mbank.service.Requests;
 
 import java.util.ArrayList;
 import java.util.List;

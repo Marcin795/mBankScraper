@@ -1,4 +1,4 @@
-package unit.mbank.model.response;
+package mbank.model.response;
 
 import com.google.gson.annotations.SerializedName;
 

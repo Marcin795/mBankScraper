@@ -1,4 +1,4 @@
-package unit.mbank.model.request;
+package mbank.model.request;
 
 import com.google.gson.annotations.SerializedName;
 import model.Credentials;

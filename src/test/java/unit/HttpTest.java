@@ -8,8 +8,8 @@ import okhttp3.Headers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import unit.mbank.model.request.LoginRequestBody;
-import unit.mbank.model.response.LoginResponseBody;
+import mbank.model.request.LoginRequestBody;
+import mbank.model.response.LoginResponseBody;
 import util.Http;
 
 import java.io.UncheckedIOException;

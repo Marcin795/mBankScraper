@@ -1,8 +1,8 @@
 package app;
 
 import model.Credentials;
-import unit.mbank.service.LoginCommand;
-import unit.mbank.service.Requests;
+import mbank.service.LoginCommand;
+import mbank.service.Requests;
 import util.CommandLine;
 import util.Delays;
 import util.Http;

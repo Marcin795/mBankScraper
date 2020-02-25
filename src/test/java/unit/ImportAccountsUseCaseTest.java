@@ -5,8 +5,8 @@ import model.Credentials;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import unit.mbank.service.BankAccess;
-import unit.mbank.service.LoginCommand;
+import mbank.service.BankAccess;
+import mbank.service.LoginCommand;
 import util.CommandLine;
 
 import java.util.Collections;

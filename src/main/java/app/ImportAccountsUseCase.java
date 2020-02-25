@@ -1,7 +1,7 @@
 package app;
 
 import model.Credentials;
-import unit.mbank.service.LoginCommand;
+import mbank.service.LoginCommand;
 import util.CommandLine;
 
 public class ImportAccountsUseCase {

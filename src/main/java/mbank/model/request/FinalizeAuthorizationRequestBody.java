@@ -1,4 +1,4 @@
-package unit.mbank.model.request;
+package mbank.model.request;
 
 public class FinalizeAuthorizationRequestBody {
 
