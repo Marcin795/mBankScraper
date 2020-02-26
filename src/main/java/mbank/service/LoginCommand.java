@@ -3,7 +3,7 @@ package mbank.service;
 import exceptions.InvalidCredentials;
 import exceptions.LoginFailed;
 import mbank.model.response.LoginResponseBody;
-import util.CommandLine;
+import util.UI;
 import util.Delays;
 import model.Credentials;
 
@@ -16,9 +16,9 @@ public class LoginCommand {
     private static final int MAX_RETRIES = 60;
     private final Requests requests;
     private final Delays delays;
-    private final CommandLine cli;
+    private final UI cli;
 
-    public LoginCommand(Requests requests, Delays delays, CommandLine cli) {
+    public LoginCommand(Requests requests, Delays delays, UI cli) {
         this.requests = requests;
         this.delays = delays;
         this.cli = cli;
@@ -26,7 +26,7 @@ public class LoginCommand {
 
     public BankAccess logIn(Credentials credentials) {
         var loginResponse = requests.getJsonLogin(credentials);
-        checkLoginSuccessful(loginResponse);
+        assertLoginSuccessful(loginResponse);
         var verificationToken = requests.fetchVerificationToken();
         var authorizationId = requests.fetchAuthorizationId();
         var tranId = requests.fetchTranId(verificationToken, authorizationId);
@@ -34,7 +34,7 @@ public class LoginCommand {
         return finalizeLogin(verificationToken, authorizationId);
     }
 
-    private static void checkLoginSuccessful(LoginResponseBody loginResponse) {
+    private static void assertLoginSuccessful(LoginResponseBody loginResponse) {
         if(!loginResponse.successful && loginResponse.errorMessageTitle.equals("Nieprawidłowy identyfikator lub hasło."))
             throw new InvalidCredentials("Passed credentials are invalid.");
     }
@@ -42,7 +42,7 @@ public class LoginCommand {
     private void awaitTwoFactorConfirmation(String tranId) {
         cli.twoFactorPrompt();
         var status = checkStatus(tranId);
-        verifyTwoFactorStatus(status);
+        assertStatusAuthorized(status);
     }
 
     private String checkStatus(String tranId) {
@@ -60,7 +60,7 @@ public class LoginCommand {
         return Set.of(AUTHORIZED, CANCELED).contains(status);
     }
 
-    private static void verifyTwoFactorStatus(String status) {
+    private static void assertStatusAuthorized(String status) {
         switch(status) {
             case AUTHORIZED:
                 break;

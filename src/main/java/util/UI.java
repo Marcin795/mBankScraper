@@ -5,11 +5,11 @@ import mbank.model.response.Account;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class CommandLine {
+public class UI {
 
-    Consumer<String> printer;
+    private final Consumer<String> printer;
 
-    public CommandLine(Consumer<String> printer) {
+    public UI(Consumer<String> printer) {
         this.printer = printer;
     }
 

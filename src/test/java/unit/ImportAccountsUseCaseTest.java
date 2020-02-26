@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import mbank.service.BankAccess;
 import mbank.service.LoginCommand;
-import util.CommandLine;
+import util.UI;
 
 import java.util.Collections;
 
@@ -24,7 +24,7 @@ class ImportAccountsUseCaseTest {
     private BankAccess bankAccess;
 
     @Mock
-    private CommandLine cli;
+    private UI cli;
 
     @BeforeEach
     void init() {
@@ -34,8 +34,8 @@ class ImportAccountsUseCaseTest {
     @Test
     void printsCorrectAccountData() {
         var credentials = new Credentials("jan", "paweł");
-        when(bankAccess.getAccounts()).thenReturn(Collections.emptyList());
         when(loginCommand.logIn(credentials)).thenReturn(bankAccess);
+        when(bankAccess.getAccounts()).thenReturn(Collections.emptyList());
         var importAccountsUseCase = new ImportAccountsUseCase(loginCommand, cli);
         importAccountsUseCase.run(credentials);
         verify(cli, times(1)).printAccounts(anyList());

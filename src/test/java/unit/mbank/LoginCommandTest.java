@@ -10,7 +10,7 @@ import mbank.model.response.LoginResponseBody;
 import mbank.service.BankAccess;
 import mbank.service.LoginCommand;
 import mbank.service.Requests;
-import util.CommandLine;
+import util.UI;
 import util.Delays;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,7 +20,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 class LoginCommandTest {
 
     @Mock
-    private CommandLine cli;
+    private UI cli;
 
     @Mock
     private Requests requests;
